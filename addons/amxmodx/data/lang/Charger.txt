@@ -1,0 +1,17 @@
+[en] -- RedSMURF
+CHARGER_CHAT_TAG            = ^3[^4CHARGER^3]^1
+CHARGER_CHAT_LIMIT          = You've reached the maximum number of chargers
+CHARGER_CHAT_NO_CHARGER     = There are no chargers available
+CHARGER_CHAT_NO_DATA        = Chargers data hasn't been found
+CHARGER_CHAT_SAVED          = Charger data has been saved successfully
+
+CHARGER_MENU_TITLE          = \yChoose your option:
+CHARGER_ROOT_CREATE         = Create Charger
+CHARGER_ROOT_REMOVE         = Remove Charger
+CHARGER_ROOT_SAVE           = Save Data
+CHARGER_DEL_NEXT            = Next
+CHARGER_DEL_BACK            = Back
+CHARGER_DEL_REMOVE          = Remove Charger
+CHARGER_ROTATE_RIGHT        = Turn Right
+CHARGER_ROTATE_LEFT         = Turn Left
+CHARGER_ROTATE_PLACE        = Place Charger

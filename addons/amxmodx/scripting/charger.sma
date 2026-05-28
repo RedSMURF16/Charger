@@ -450,7 +450,6 @@ public plugin_precache()
     precache_sound("debris/metal3.wav")
     precache_sound("debris/bustmetal1.wav")
     precache_sound("debris/bustmetal2.wav")
-
     ReadFile()
 }
 

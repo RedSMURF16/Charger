@@ -444,6 +444,12 @@ public plugin_precache()
     g_eSettings[SETTING_SOUND_FLICKER] = ArrayCreate(MAX_RESOURCE_PATH_LENGTH)
     g_eSettings[SETTING_SOUND_METAL] = ArrayCreate(MAX_RESOURCE_PATH_LENGTH)
 
+    precache_model("models/metalplategibs.mdl")
+    precache_sound("debris/metal1.wav")
+    precache_sound("debris/metal2.wav")
+    precache_sound("debris/metal3.wav")
+    precache_sound("debris/bustmetal1.wav")
+    precache_sound("debris/bustmetal2.wav")
     ReadFile()
 }
 

@@ -641,6 +641,10 @@ ReadFile()
             default:
             {
                 strtok(szData, szKey, charsmax(szKey), szValue, charsmax(szValue), '=')
+                iPos = contain(szValue, "#")
+                if ( iPos != -1 )
+                    szValue[iPos] = EOS
+
                 trim(szKey)
                 trim(szValue)
 

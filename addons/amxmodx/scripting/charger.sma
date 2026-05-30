@@ -569,7 +569,7 @@ ReadFile()
     new szData[MAX_FILE_CELL_SIZE],
         szKey[MAX_VALUE_LENGTH],
         szValue[MAX_RESOURCE_PATH_LENGTH],
-        eCharger[CHARGER], iSection = SECTION_NONE, iLine
+        eCharger[CHARGER], iSection = SECTION_NONE, iLine, iPos
 
     while( !feof(iFile) )
     {

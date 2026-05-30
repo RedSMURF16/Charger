@@ -850,6 +850,7 @@ ReadFile()
                             g_eSettings[SETTING_BREAK_LIFE][0] = str_to_num(szKey)
                             g_eSettings[SETTING_BREAK_LIFE][1] = str_to_num(szValue)
                         }
+
                         else if ( equali(szKey, "SETTING_SPRITE_ZEROGXPLODE") )
                         {
                             if ( !g_bFileWasRead )

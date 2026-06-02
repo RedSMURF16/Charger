@@ -106,15 +106,13 @@ enum
     FLAG_BREAK          = (1 << 0),
     FLAG_EXPLODE        = (1 << 1),
     FLAG_WEAR           = (1 << 2),
-    FLAG_SPARK          = (1 << 3),
-    FLAG_SOUND          = (1 << 4),
-    FLAG_GIB            = (1 << 5),
+    FLAG_SOUND          = (1 << 3),
 
-    FLAG_SHOW           = (1 << 6),
-    FLAG_DEAD           = (1 << 7),
-    FLAG_GHOST          = (1 << 8),
-    FLAG_VALID          = (1 << 9),
-    FLAG_SELECT         = (1 << 10)
+    FLAG_SHOW           = (1 << 4),
+    FLAG_DEAD           = (1 << 5),
+    FLAG_GHOST          = (1 << 6),
+    FLAG_VALID          = (1 << 7),
+    FLAG_SELECT         = (1 << 8)
 }
 
 enum
@@ -160,16 +158,18 @@ enum _:MAIN_SETTINGS
     SETTING_DEFAULT_TEAM,
     SETTING_DEFAULT_SOUND,
     SETTING_DEFAULT_MODE,
+
+    Float:SETTING_DEFAULT_RATE,
+    Float:SETTING_DEFAULT_LIMIT,
+    Float:SETTING_DEFAULT_DELAY,
+    Float:SETTING_DEFAULT_REFILL,
+    Float:SETTING_DEFAULT_CAPACITY,
+    Float:SETTING_DEFAULT_DELAY_ACTIVE,
+
     SETTING_DEFAULT_SPAWN_MODE,
     Float:SETTING_DEFAULT_SPAWN[2],
     Float:SETTING_DEFAULT_SPAWN_CHANCE,
-    Float:SETTING_DEFAULT_RATE,
-    Float:SETTING_DEFAULT_DELAY,
-    Float:SETTING_DEFAULT_CAPACITY,
-    Float:SETTING_DEFAULT_CAPACITY_MAX,
-    Float:SETTING_DEFAULT_LIMIT,
-    Float:SETTING_DEFAULT_REFILL,
-    Float:SETTING_DEFAULT_DELAY_ACTIVE,
+
     Float:SETTING_DEFAULT_HEALTH,
     Float:SETTING_DEFAULT_EXPLODE_DAMAGE,
     Float:SETTING_DEFAULT_EXPLODE_RADIUS,
@@ -218,9 +218,9 @@ enum _:CHARGER
 {
     CHARGER_ID,
     CHARGER_ITEM,
-    CHARGER_SHOW,
     CHARGER_CLASS,
     CHARGER_FLAGS,
+    CHARGER_SHOW,
     CHARGER_TEAM,
     CHARGER_SOUND,
     CHARGER_MODE,
@@ -233,11 +233,11 @@ enum _:CHARGER
     Float:CHARGER_MAXS[3],
 
     Float:CHARGER_RATE,
+    Float:CHARGER_LIMIT,
     Float:CHARGER_DELAY,
+    Float:CHARGER_REFILL,
     Float:CHARGER_CAPACITY,
     Float:CHARGER_CAPACITY_MAX,
-    Float:CHARGER_LIMIT,
-    Float:CHARGER_REFILL,
     Float:CHARGER_DELAY_ACTIVE,
 
     CHARGER_SPAWN_MODE,
@@ -396,7 +396,6 @@ new Array:g_aCharger,
     Array:g_aChargerConfig,
     g_eSettings[MAIN_SETTINGS],
     g_ePlayerData[MAX_PLAYERS + 1][PLAYER_DATA],
-    g_szFileName[MAX_RESOURCE_PATH_LENGTH],
     bool:g_bFileWasRead = false,
     g_iCharger,
     g_iChargerConfig,
@@ -541,7 +540,7 @@ public eventRoundStart()
     return PLUGIN_HANDLED
 }
 
-ReadFile()
+stock ReadFile()
 {
     if ( g_bFileWasRead )
     {
@@ -555,6 +554,7 @@ ReadFile()
         g_iChargerConfig = 0
     }
 
+    new g_szFileName[MAX_RESOURCE_PATH_LENGTH]
     get_configsdir(g_szFileName, charsmax(g_szFileName))
     add(g_szFileName, charsmax(g_szFileName), "/Charger.ini")
 
@@ -614,11 +614,10 @@ ReadFile()
                         eCharger[CHARGER_SPAWN_CHANCE]    = g_eSettings[SETTING_DEFAULT_SPAWN_CHANCE]
 
                         eCharger[CHARGER_RATE]            = g_eSettings[SETTING_DEFAULT_RATE]
-                        eCharger[CHARGER_DELAY]           = g_eSettings[SETTING_DEFAULT_DELAY]
-                        eCharger[CHARGER_CAPACITY]        = g_eSettings[SETTING_DEFAULT_CAPACITY]
-                        eCharger[CHARGER_CAPACITY_MAX]    = g_eSettings[SETTING_DEFAULT_CAPACITY_MAX]
                         eCharger[CHARGER_LIMIT]           = g_eSettings[SETTING_DEFAULT_LIMIT]
+                        eCharger[CHARGER_DELAY]           = g_eSettings[SETTING_DEFAULT_DELAY]
                         eCharger[CHARGER_REFILL]          = g_eSettings[SETTING_DEFAULT_REFILL]
+                        eCharger[CHARGER_CAPACITY]        = g_eSettings[SETTING_DEFAULT_CAPACITY]
                         eCharger[CHARGER_DELAY_ACTIVE]    = g_eSettings[SETTING_DEFAULT_DELAY_ACTIVE]
 
                         eCharger[CHARGER_HEALTH]          = g_eSettings[SETTING_DEFAULT_HEALTH]
@@ -673,6 +672,7 @@ ReadFile()
                         else if ( equali(szKey, "SETTING_DEFAULT_FLAGS") )
                         {
                             g_eSettings[SETTING_DEFAULT_FLAGS] = read_flags(szValue)
+                            g_eSettings[SETTING_DEFAULT_FLAGS] &= 15
                         }
                         else if ( equali(szKey, "SETTING_DEFAULT_TEAM") )
                         {
@@ -704,25 +704,21 @@ ReadFile()
                         {
                             g_eSettings[SETTING_DEFAULT_RATE] = str_to_float(szValue)
                         }
-                        else if ( equali(szKey, "SETTING_DEFAULT_DELAY") )
-                        {
-                            g_eSettings[SETTING_DEFAULT_DELAY] = str_to_float(szValue)
-                        }
-                        else if ( equali(szKey, "SETTING_DEFAULT_CAPACITY") )
-                        {
-                            g_eSettings[SETTING_DEFAULT_CAPACITY] = str_to_float(szValue)
-                        }
-                        else if ( equali(szKey, "SETTING_DEFAULT_CAPACITY_MAX") )
-                        {
-                            g_eSettings[SETTING_DEFAULT_CAPACITY_MAX] = str_to_float(szValue)
-                        }
                         else if ( equali(szKey, "SETTING_DEFAULT_LIMIT") )
                         {
                             g_eSettings[SETTING_DEFAULT_LIMIT] = str_to_float(szValue)
                         }
+                        else if ( equali(szKey, "SETTING_DEFAULT_DELAY") )
+                        {
+                            g_eSettings[SETTING_DEFAULT_DELAY] = str_to_float(szValue)
+                        }
                         else if ( equali(szKey, "SETTING_DEFAULT_REFILL") )
                         {
                             g_eSettings[SETTING_DEFAULT_REFILL] = str_to_float(szValue)
+                        }
+                        else if ( equali(szKey, "SETTING_DEFAULT_CAPACITY") )
+                        {
+                            g_eSettings[SETTING_DEFAULT_CAPACITY] = str_to_float(szValue)
                         }
                         else if ( equali(szKey, "SETTING_DEFAULT_DELAY_ACTIVE") )
                         {
@@ -850,7 +846,6 @@ ReadFile()
                             g_eSettings[SETTING_BREAK_LIFE][0] = str_to_num(szKey)
                             g_eSettings[SETTING_BREAK_LIFE][1] = str_to_num(szValue)
                         }
-
                         else if ( equali(szKey, "SETTING_SPRITE_ZEROGXPLODE") )
                         {
                             if ( !g_bFileWasRead )
@@ -946,7 +941,7 @@ ReadFile()
                         else if ( equali(szKey, "CHARGER_FLAGS") )
                         {
                             eCharger[CHARGER_FLAGS] = read_flags(szValue)
-                            eCharger[CHARGER_FLAGS] &= 63
+                            eCharger[CHARGER_FLAGS] &= 15
                         }
                         else if ( equali(szKey, "CHARGER_TEAM") )
                         {
@@ -973,6 +968,9 @@ ReadFile()
                             strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
                             eCharger[CHARGER_SPAWN][0] = str_to_float(szKey)
                             eCharger[CHARGER_SPAWN][1] = str_to_float(szValue)
+
+                            if ( eCharger[CHARGER_SPAWN][0] < 0.0 ) eCharger[CHARGER_SPAWN][0] = g_eSettings[SETTING_DEFAULT_SPAWN][0]
+                            if ( eCharger[CHARGER_SPAWN][1] < 0.0 ) eCharger[CHARGER_SPAWN][1] = g_eSettings[SETTING_DEFAULT_SPAWN][1]
                         }
                         else if ( equali(szKey, "CHARGER_SPAWN_CHANCE") )
                         {
@@ -982,64 +980,64 @@ ReadFile()
                         else if ( equali(szKey, "CHARGER_RATE") )
                         {
                             eCharger[CHARGER_RATE] = str_to_float(szValue)
-                            if ( eCharger[CHARGER_RATE] < 0.0 ) eCharger[CHARGER_RATE] = 1.0
-                        }
-                        else if ( equali(szKey, "CHARGER_DELAY") )
-                        {
-                            eCharger[CHARGER_DELAY] = str_to_float(szValue)
-                            if ( eCharger[CHARGER_DELAY] < 0.0 ) eCharger[CHARGER_DELAY] = 0.1
-                        }
-                        else if ( equali(szKey, "CHARGER_CAPACITY") )
-                        {
-                            eCharger[CHARGER_CAPACITY] = str_to_float(szValue)
-                            if ( eCharger[CHARGER_CAPACITY] < 0.0 ) eCharger[CHARGER_CAPACITY] = 100.0
-
-                            eCharger[CHARGER_CAPACITY_MAX] = eCharger[CHARGER_CAPACITY]
+                            if ( eCharger[CHARGER_RATE] < 0.0 ) eCharger[CHARGER_RATE] = g_eSettings[SETTING_DEFAULT_RATE]
                         }
                         else if ( equali(szKey, "CHARGER_LIMIT") )
                         {
                             eCharger[CHARGER_LIMIT] = str_to_float(szValue)
-                            if ( eCharger[CHARGER_LIMIT] < 0.0 ) eCharger[CHARGER_LIMIT] = 0.0
+                            if ( eCharger[CHARGER_LIMIT] < 0.0 ) eCharger[CHARGER_LIMIT] = g_eSettings[SETTING_DEFAULT_LIMIT]
+                        }
+                        else if ( equali(szKey, "CHARGER_DELAY") )
+                        {
+                            eCharger[CHARGER_DELAY] = str_to_float(szValue)
+                            if ( eCharger[CHARGER_DELAY] < 0.0 ) eCharger[CHARGER_DELAY] = g_eSettings[SETTING_DEFAULT_DELAY]
                         }
                         else if ( equali(szKey, "CHARGER_REFILL") )
                         {
                             eCharger[CHARGER_REFILL] = str_to_float(szValue)
-                            if ( eCharger[CHARGER_REFILL] < 0.0 ) eCharger[CHARGER_REFILL] = 0.0
+                            if ( eCharger[CHARGER_REFILL] < 0.0 ) eCharger[CHARGER_REFILL] = g_eSettings[SETTING_DEFAULT_REFILL]
+                        }
+                        else if ( equali(szKey, "CHARGER_CAPACITY") )
+                        {
+                            eCharger[CHARGER_CAPACITY] = str_to_float(szValue)
+                            if ( eCharger[CHARGER_CAPACITY] < 0.0 ) eCharger[CHARGER_CAPACITY] = g_eSettings[SETTING_DEFAULT_CAPACITY]
+
+                            eCharger[CHARGER_CAPACITY_MAX] = eCharger[CHARGER_CAPACITY]
                         }
                         else if ( equali(szKey, "CHARGER_DELAY_ACTIVE") )
                         {
                             eCharger[CHARGER_DELAY_ACTIVE] = str_to_float(szValue)
-                            if ( eCharger[CHARGER_DELAY_ACTIVE] < 0.0 ) eCharger[CHARGER_DELAY_ACTIVE] = 0.0
+                            if ( eCharger[CHARGER_DELAY_ACTIVE] < 0.0 ) eCharger[CHARGER_DELAY_ACTIVE] = g_eSettings[SETTING_DEFAULT_DELAY_ACTIVE]
                         }
                         else if ( equali(szKey, "CHARGER_HEALTH") )
                         {
                             eCharger[CHARGER_HEALTH] = str_to_float(szValue)
-                            if ( eCharger[CHARGER_HEALTH] < 0.0 ) eCharger[CHARGER_HEALTH] = 250.0
+                            if ( eCharger[CHARGER_HEALTH] < 0.0 ) eCharger[CHARGER_HEALTH] = g_eSettings[SETTING_DEFAULT_HEALTH]
                         }
                         else if ( equali(szKey, "CHARGER_EXPLODE_DAMAGE") )
                         {
                             eCharger[CHARGER_EXPLODE_DAMAGE] = str_to_float(szValue)
-                            if ( eCharger[CHARGER_EXPLODE_DAMAGE] < 0.0 ) eCharger[CHARGER_EXPLODE_DAMAGE] = 100.0
+                            if ( eCharger[CHARGER_EXPLODE_DAMAGE] < 0.0 ) eCharger[CHARGER_EXPLODE_DAMAGE] = g_eSettings[SETTING_DEFAULT_EXPLODE_DAMAGE]
                         }
                         else if ( equali(szKey, "CHARGER_EXPLODE_RADIUS") )
                         {
                             eCharger[CHARGER_EXPLODE_RADIUS] = str_to_float(szValue)
-                            if ( eCharger[CHARGER_EXPLODE_RADIUS] < 0.0 ) eCharger[CHARGER_EXPLODE_RADIUS] = 150.0
+                            if ( eCharger[CHARGER_EXPLODE_RADIUS] < 0.0 ) eCharger[CHARGER_EXPLODE_RADIUS] = g_eSettings[SETTING_DEFAULT_EXPLODE_RADIUS]
                         }
                         else if ( equali(szKey, "CHARGER_BREAK_RATIO") )
                         {
                             eCharger[CHARGER_BREAK_RATIO] = str_to_float(szValue)
-                            if ( eCharger[CHARGER_BREAK_RATIO] < 0.0 || eCharger[CHARGER_BREAK_RATIO] > 100.0 ) eCharger[CHARGER_BREAK_RATIO] = 2.5
+                            if ( eCharger[CHARGER_BREAK_RATIO] < 0.0 || eCharger[CHARGER_BREAK_RATIO] > 100.0 ) eCharger[CHARGER_BREAK_RATIO] = g_eSettings[SETTING_DEFAULT_BREAK_RATIO]
                         }
                         else if ( equali(szKey, "CHARGER_BREAK_THRESHOLD") )
                         {
                             eCharger[CHARGER_BREAK_THRESHOLD] = str_to_float(szValue)
-                            if ( eCharger[CHARGER_BREAK_THRESHOLD] < 0.0 || eCharger[CHARGER_BREAK_THRESHOLD] > 100.0 ) eCharger[CHARGER_BREAK_THRESHOLD] = 70.0
+                            if ( eCharger[CHARGER_BREAK_THRESHOLD] < 0.0 || eCharger[CHARGER_BREAK_THRESHOLD] > 100.0 ) eCharger[CHARGER_BREAK_THRESHOLD] = g_eSettings[SETTING_DEFAULT_BREAK_THRESHOLD]
                         }
                         else if ( equali(szKey, "CHARGER_BREAK_CHANCE") )
                         {
                             eCharger[CHARGER_BREAK_CHANCE] = str_to_float(szValue)
-                            if ( eCharger[CHARGER_BREAK_CHANCE] < 0.0 || eCharger[CHARGER_BREAK_CHANCE] > 100.0 ) eCharger[CHARGER_BREAK_CHANCE] = 0.4
+                            eCharger[CHARGER_BREAK_CHANCE] = floatclamp(eCharger[CHARGER_BREAK_CHANCE], 0.0, 1.0)
                         }
                     }
                 }
@@ -1077,9 +1075,10 @@ public client_authorized(id)
 
 public client_disconnected(id)
 {
-    if ( g_ePlayerData[id][PDATA_CHARGER_GHOST] )
+    new iItem
+    if ( g_ePlayerData[id][PDATA_CHARGER_GHOST]
+    && (iItem = pev(g_ePlayerData[id][PDATA_CHARGER_GHOST], CHARGER_ARRAY_ITEM)) != -1 )
     {
-        new iItem = pev(g_ePlayerData[id][PDATA_CHARGER_GHOST], CHARGER_ARRAY_ITEM)
         chargerKill(g_ePlayerData[id][PDATA_CHARGER_GHOST])
         chargerRemove(iItem)
     }
@@ -1107,7 +1106,7 @@ public chargerInit()
 public chargerMenu(id, iType)
 {
     new szData[64], iMenu
-    formatex(szData, charsmax(szData), "%L^n%L", id, "CHARGER_MENU_TITLE", id, "CHARGER_MENU_TITLE_PAGE")
+    formatex(szData, charsmax(szData), "%L^n%L", id, "CHARGER_MENU_TITLE", PLUGIN_VERSION, id, "CHARGER_MENU_TITLE_PAGE")
     iMenu = menu_create(szData, g_szMenuHandler[iType])
 
     switch( iType )
@@ -1188,7 +1187,7 @@ public menuHandlerRoot(id, menu, item)
         {
             if ( g_iCharger >= MAX_ENT )
             {
-                client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_LIMIT")
+                client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_LIMIT", MAX_ENT)
             }
             else
             {
@@ -1809,8 +1808,14 @@ public menuRotate(id, iMenu)
 
 public menuHandlerRotate(id, menu, item)
 {
-    new eCharger[CHARGER], iItem, Float:fCurrentTime
-    iItem = chargerGet(eCharger, g_ePlayerData[id][PDATA_CHARGER_GHOST])
+    new eCharger[CHARGER], iItem
+    if ( (iItem = chargerGet(eCharger, g_ePlayerData[id][PDATA_CHARGER_GHOST])) == -1 )
+    {
+        menu_destroy( menu )
+        return PLUGIN_HANDLED
+    }
+
+    new Float:fCurrentTime
     fCurrentTime = get_gametime()
 
     switch( item )
@@ -1876,10 +1881,10 @@ public chargerTask()
 
     for ( new id = 1; id <= g_iMaxPlayers; id ++ )
     {
-        if ( !g_ePlayerData[id][PDATA_CHARGER_GHOST] )
+        if ( !g_ePlayerData[id][PDATA_CHARGER_GHOST]
+        || (iItem = chargerGet(eCharger, g_ePlayerData[id][PDATA_CHARGER_GHOST])) == -1 )
             continue
 
-        iItem = chargerGet(eCharger, g_ePlayerData[id][PDATA_CHARGER_GHOST])
         chargerTrace(eCharger, id, iItem)
     }
 
@@ -2134,7 +2139,6 @@ stock loadDataCharger(Float:fOrigin[3], Float:fAngles[3], iShow, iFlags, iTeam, 
 
     xs_vec_copy(fOrigin, eCharger[CHARGER_ORIGIN])
     xs_vec_copy(fAngles, eCharger[CHARGER_ANGLES])
-
     set_pev(eCharger[CHARGER_ID], pev_origin, fOrigin)
     set_pev(eCharger[CHARGER_ID], pev_angles, fAngles)
 
@@ -2150,7 +2154,6 @@ stock loadDataCharger(Float:fOrigin[3], Float:fAngles[3], iShow, iFlags, iTeam, 
         eCharger[CHARGER_NEXT_SPAWN] = fCurrentTime + random_float(eCharger[CHARGER_SPAWN][0], eCharger[CHARGER_SPAWN][1])
 
     chargerSetBox(eCharger)
-
     if ( eCharger[CHARGER_FLAGS] & FLAG_SHOW )
     {
         chargerSetAnim(eCharger, false)
@@ -2174,80 +2177,6 @@ public chargerGodMode(id)
 
     chargerSound(id, SOUND_MENU_NAV)
     chargerMenu(id, MENU_ROOT)
-}
-
-public fwdSpawn(iEnt)
-{
-    if ( !isCharger(iEnt) )
-        return HAM_IGNORED
-
-    set_pev(iEnt, pev_solid, SOLID_NOT)
-    set_pev(iEnt, pev_movetype, MOVETYPE_FLY)
-
-    return HAM_IGNORED
-}
-
-public fwdTakeDamage(iEnt, iInflictor, iAttacker, Float:fDamage, iDamageBits)
-{
-    if ( !isCharger(iEnt) )
-        return HAM_IGNORED
-
-    new eCharger[CHARGER], iItem, Float:fCurrentTime
-    iItem = chargerGet(eCharger, iEnt)
-    fCurrentTime = get_gametime()
-
-    if ( !(eCharger[CHARGER_FLAGS] & FLAG_SHOW) )
-        return HAM_IGNORED
-
-    new Float:fHealth
-    pev(iEnt, pev_health, fHealth)
-
-    if ( !(eCharger[CHARGER_FLAGS] & FLAG_BREAK)
-    || eCharger[CHARGER_SHOW] == SHOW_FORCE_SHOW )
-    {
-        SetHamParamFloat(4, 0.0)
-    }
-    else if ( fDamage >= fHealth )
-    {
-        eCharger[CHARGER_FLAGS] &= ~FLAG_SHOW
-        chargerState(eCharger, false, true)
-
-        if ( eCharger[CHARGER_FLAGS] & FLAG_GIB )
-            chargerGib(eCharger[CHARGER_ID])
-
-        if ( eCharger[CHARGER_SHOW] == SHOW_DEFAULT
-        && eCharger[CHARGER_SPAWN_MODE] == SPAWN_DELAY )
-            eCharger[CHARGER_NEXT_SPAWN] = fCurrentTime + random_float(eCharger[CHARGER_SPAWN][0], eCharger[CHARGER_SPAWN][1])
-
-        if ( eCharger[CHARGER_FLAGS] & FLAG_EXPLODE )
-            chargerExplode(eCharger)
-
-        ArraySetArray(g_aCharger, iItem, eCharger)
-        SetHamParamFloat(4, 0.0)
-    }
-
-    return HAM_IGNORED
-}
-
-public fwdTraceAttack(iEnt, iAttacker, Float:fDamage, Float:fDirection[3], iTr, iDamageBits)
-{
-    if ( !isCharger(iEnt) )
-        return HAM_IGNORED
-
-    new eCharger[CHARGER], Float:fEnd[3]
-    chargerGet(eCharger, iEnt)
-    get_tr2(iTr, TR_vecEndPos, fEnd)
-
-    if ( eCharger[CHARGER_FLAGS] & FLAG_SPARK )
-    {
-        chargerParticles(fEnd)
-        chargerSparks(fEnd)
-    }
-
-    if ( eCharger[CHARGER_FLAGS] & FLAG_SOUND )
-        chargerSound(iEnt, SOUND_METAL, CHAN_VOICE, false)
-
-    return HAM_IGNORED
 }
 
 public fwdUpdateClientData(id, iSendWeapons, iHandle)
@@ -2300,28 +2229,69 @@ public fwdAddToFullPack(es, e, iEnt, iHost, iHostFlags, iPlayer, pSet)
     return FMRES_IGNORED
 }
 
-public fwdKilled(id, iAttacker, bGib)
+public fwdSpawn(iEnt)
 {
-    g_ePlayerData[id][PDATA_CHARGER_ACTION] = false
-    g_ePlayerData[id][PDATA_CHARGER_MENU]   = 0
+    if ( !isCharger(iEnt) )
+        return HAM_IGNORED
 
-    if ( g_ePlayerData[id][PDATA_CHARGER_GHOST] )
+    set_pev(iEnt, pev_solid, SOLID_NOT)
+    set_pev(iEnt, pev_movetype, MOVETYPE_FLY)
+
+    return HAM_IGNORED
+}
+
+public fwdTakeDamage(iEnt, iInflictor, iAttacker, Float:fDamage, iDamageBits)
+{
+    if ( !isCharger(iEnt) )
+        return HAM_IGNORED
+
+    new eCharger[CHARGER], iItem
+    if ( !(eCharger[CHARGER_FLAGS] & FLAG_SHOW)
+    || (iItem = chargerGet(eCharger, iEnt)) == -1 )
+        return HAM_IGNORED
+
+    new Float:fHealth, Float:fCurrentTime
+    pev(iEnt, pev_health, fHealth)
+    fCurrentTime = get_gametime()
+
+    if ( !(eCharger[CHARGER_FLAGS] & FLAG_BREAK)
+    || eCharger[CHARGER_SHOW] == SHOW_FORCE_SHOW )
     {
-        new eCharger[CHARGER], iItem
-        iItem = chargerGet(eCharger, g_ePlayerData[id][PDATA_CHARGER_GHOST])
-
-        chargerKill(g_ePlayerData[id][PDATA_CHARGER_GHOST])
-        chargerRemove(iItem)
-        g_ePlayerData[id][PDATA_CHARGER_GHOST] = 0
+        SetHamParamFloat(4, 0.0)
     }
-    else if ( g_ePlayerData[id][PDATA_CHARGER_USE] )
+    else if ( fDamage >= fHealth )
     {
-        new eCharger[CHARGER]
-        chargerGet(eCharger, g_ePlayerData[id][PDATA_CHARGER_USE])
+        eCharger[CHARGER_FLAGS] &= ~FLAG_SHOW
+        chargerState(eCharger, false, true)
 
-        chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_CHARGE : SOUND_HEV_CHARGE, CHAN_ITEM, false, SND_STOP)
-        g_ePlayerData[id][PDATA_CHARGER_USE] = 0
+        chargerGib(eCharger[CHARGER_ID])
+        if ( eCharger[CHARGER_SHOW] == SHOW_DEFAULT
+        && eCharger[CHARGER_SPAWN_MODE] == SPAWN_DELAY )
+            eCharger[CHARGER_NEXT_SPAWN] = fCurrentTime + random_float(eCharger[CHARGER_SPAWN][0], eCharger[CHARGER_SPAWN][1])
+
+        if ( eCharger[CHARGER_FLAGS] & FLAG_EXPLODE )
+            chargerExplode(eCharger)
+
+        ArraySetArray(g_aCharger, iItem, eCharger)
+        SetHamParamFloat(4, 0.0)
     }
+
+    return HAM_IGNORED
+}
+
+public fwdTraceAttack(iEnt, iAttacker, Float:fDamage, Float:fDirection[3], iTr, iDamageBits)
+{
+    if ( !isCharger(iEnt) )
+        return HAM_IGNORED
+
+    new eCharger[CHARGER], Float:fEnd[3]
+    chargerGet(eCharger, iEnt)
+    get_tr2(iTr, TR_vecEndPos, fEnd)
+
+    chargerParticles(fEnd)
+    chargerSparks(fEnd)
+    if ( eCharger[CHARGER_FLAGS] & FLAG_SOUND )
+        chargerSound(iEnt, SOUND_METAL, CHAN_VOICE, false)
 
     return HAM_IGNORED
 }
@@ -2382,6 +2352,35 @@ public fwdPreThink(id)
     return HAM_IGNORED
 }
 
+public fwdKilled(id, iAttacker, bGib)
+{
+    g_ePlayerData[id][PDATA_CHARGER_ACTION] = false
+    g_ePlayerData[id][PDATA_CHARGER_MENU]   = 0
+
+    if ( g_ePlayerData[id][PDATA_CHARGER_GHOST] )
+    {
+        new eCharger[CHARGER], iItem
+
+        if ( (iItem = chargerGet(eCharger, g_ePlayerData[id][PDATA_CHARGER_GHOST])) != -1 )
+        {
+            chargerKill(g_ePlayerData[id][PDATA_CHARGER_GHOST])
+            chargerRemove(iItem)
+        }
+
+        g_ePlayerData[id][PDATA_CHARGER_GHOST] = 0
+    }
+    else if ( g_ePlayerData[id][PDATA_CHARGER_USE] )
+    {
+        new eCharger[CHARGER]
+        if ( chargerGet(eCharger, g_ePlayerData[id][PDATA_CHARGER_GHOST]) != -1 )
+            chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_CHARGE : SOUND_HEV_CHARGE, CHAN_ITEM, false, SND_STOP)
+
+        g_ePlayerData[id][PDATA_CHARGER_USE] = 0
+    }
+
+    return HAM_IGNORED
+}
+
 public bool:chargerTrace(eCharger[CHARGER], id, iItem)
 {
     new Float:fVec1[3], Float:fVec2[3],
@@ -2426,16 +2425,6 @@ public bool:chargerTrace(eCharger[CHARGER], id, iItem)
     return fFraction < 1.0
 }
 
-public chargerSparks(Float:fOrigin[])
-{
-    message_begin_f(MSG_BROADCAST, SVC_TEMPENTITY)
-    write_byte(TE_SPARKS)
-    write_coord_f(fOrigin[0])
-    write_coord_f(fOrigin[1])
-    write_coord_f(fOrigin[2])
-    message_end()
-}
-
 public chargerUse(id)
 {
     if ( !(pev(id, pev_button) & IN_USE) )
@@ -2455,7 +2444,7 @@ public chargerUse(id)
     xs_vec_mul_scalar(fVec1, g_eSettings[SETTING_CHARGER_RANGE], fVec1)
     xs_vec_add(fVec1, fOrigin, fVec1)
 
-    engfunc(EngFunc_TraceLine, fOrigin, fVec1, IGNORE_MONSTERS, id, 0)
+    engfunc(EngFunc_TraceLine, fOrigin, fVec1, DONT_IGNORE_MONSTERS, id, 0)
     get_tr2(0, TR_vecEndPos, fOrigin)
 
     while( (iEnt = engfunc(EngFunc_FindEntityInSphere, iEnt, fOrigin, 5.0)) )
@@ -2481,15 +2470,15 @@ public chargerSupply(id, eCharger[CHARGER], iItem, Float:fCurrentTime)
 
             if ( eCharger[CHARGER_FLAGS] & FLAG_WEAR )
             {
+                eCharger[CHARGER_OVERLOAD] += eCharger[CHARGER_BREAK_RATIO]
+
                 if ( eCharger[CHARGER_OVERLOAD] >= eCharger[CHARGER_BREAK_THRESHOLD]
                 && eCharger[CHARGER_BREAK_CHANCE] >= random_float(0.0, 1.0) )
                 {
                     eCharger[CHARGER_FLAGS] &= ~FLAG_SHOW
                     chargerState(eCharger, false, true)
 
-                    if ( eCharger[CHARGER_FLAGS] & FLAG_GIB )
-                        chargerGib(eCharger[CHARGER_ID])
-
+                    chargerGib(eCharger[CHARGER_ID])
                     if ( eCharger[CHARGER_SHOW] == SHOW_DEFAULT
                     && eCharger[CHARGER_SPAWN_MODE] == SPAWN_DELAY )
                         eCharger[CHARGER_NEXT_SPAWN] = fCurrentTime + random_float(eCharger[CHARGER_SPAWN][0], eCharger[CHARGER_SPAWN][1])
@@ -2497,8 +2486,6 @@ public chargerSupply(id, eCharger[CHARGER], iItem, Float:fCurrentTime)
                     if ( eCharger[CHARGER_FLAGS] & FLAG_EXPLODE )
                         chargerExplode(eCharger)
                 }
-
-                eCharger[CHARGER_OVERLOAD] += eCharger[CHARGER_BREAK_RATIO]
 
                 if ( !eCharger[CHARGER_NEXT_FLICKER]
                 && eCharger[CHARGER_OVERLOAD] >= eCharger[CHARGER_BREAK_THRESHOLD] )
@@ -2538,7 +2525,7 @@ public chargerSupply(id, eCharger[CHARGER], iItem, Float:fCurrentTime)
     }
 }
 
-supplyHealth(eCharger[CHARGER], id, Float:fCurrentTime)
+stock supplyHealth(eCharger[CHARGER], id, Float:fCurrentTime)
 {
     new Float:fHealth,
         Float:fBoost
@@ -2558,7 +2545,7 @@ supplyHealth(eCharger[CHARGER], id, Float:fCurrentTime)
     eCharger[CHARGER_NEXT_USE] = fCurrentTime + eCharger[CHARGER_DELAY]
 }
 
-supplyArmor(eCharger[CHARGER], id, Float:fCurrentTime)
+stock supplyArmor(eCharger[CHARGER], id, Float:fCurrentTime)
 {
     new Float:fArmor,
         Float:fBoost
@@ -2709,6 +2696,16 @@ stock chargerSetSeq(iEnt, iSequence)
     set_pev(iEnt, pev_frame, 0.0)
     set_pev(iEnt, pev_framerate, 1.0)
     set_pev(iEnt, pev_animtime, get_gametime())
+}
+
+public chargerSparks(Float:fOrigin[])
+{
+    message_begin_f(MSG_BROADCAST, SVC_TEMPENTITY)
+    write_byte(TE_SPARKS)
+    write_coord_f(fOrigin[0])
+    write_coord_f(fOrigin[1])
+    write_coord_f(fOrigin[2])
+    message_end()
 }
 
 stock chargerParticles(Float:fOrigin[3])

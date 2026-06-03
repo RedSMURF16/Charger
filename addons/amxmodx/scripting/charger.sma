@@ -73,7 +73,7 @@
 
 #define MAX_ENT             32
 #define BREAK_FLAG_METAL    2
-#define CHARGER_KEY         1428
+#define CHARGER_KEY         1248
 #define CHARGER_ARRAY_ITEM  pev_iuser1
 
 /**
@@ -1879,6 +1879,7 @@ public chargerTask()
 
             if ( eCharger[CHARGER_NEXT_FLICKER] )
                 eCharger[CHARGER_NEXT_FLICKER] = fCurrentTime + random_float(4.0, 8.0)
+
             if ( eCharger[CHARGER_FLAGS] & FLAG_SOUND )
                 chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_SHOT : SOUND_HEV_SHOT, CHAN_ITEM, false)
 
@@ -1906,7 +1907,9 @@ public chargerTask()
                 eCharger[CHARGER_NEXT_SPAWN] = 0.0
 
                 chargerState(eCharger, true, true)
-                chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_SHOT : SOUND_HEV_SHOT, CHAN_ITEM, false)
+
+                if ( eCharger[CHARGER_FLAGS] & FLAG_SOUND )
+                    chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_SHOT : SOUND_HEV_SHOT, CHAN_ITEM, false)
 
                 bModified = true
             }
@@ -2480,7 +2483,10 @@ public chargerSupply(id, eCharger[CHARGER], iItem, Float:fCurrentTime)
         if ( !eCharger[CHARGER_CAPACITY] )
         {
             chargerSetSeq(eCharger[CHARGER_ID], CHARGER_SEQ_OFF)
-            chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_NO : SOUND_HEV_NO, CHAN_ITEM, false)
+
+            if ( eCharger[CHARGER_FLAGS] & FLAG_SOUND )
+                chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_NO : SOUND_HEV_NO, CHAN_ITEM, false)
+
             eCharger[CHARGER_NEXT_EMPTY] = fCurrentTime + 1.0
             g_ePlayerData[id][PDATA_CHARGER_USE] = 0
 
@@ -2700,8 +2706,9 @@ stock chargerFlicker(iEnt)
     new Float:fOrigin[3]
     pev(iEnt, pev_origin, fOrigin)
 
-    chargerSound(iEnt, SOUND_FLICKER, CHAN_VOICE, false)
     chargerSparks(fOrigin)
+    if ( eCharger[CHARGER_FLAGS] & FLAG_SOUND )
+        chargerSound(iEnt, SOUND_FLICKER, CHAN_VOICE, false)
 }
 
 stock chargerExplode(eCharger[CHARGER])

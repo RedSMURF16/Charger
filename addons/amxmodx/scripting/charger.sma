@@ -72,7 +72,6 @@
 #endif
 
 #define MAX_ENT             32
-#define TASK_ACTION         1248
 #define BREAK_FLAG_METAL    2
 #define CHARGER_KEY         1428
 #define CHARGER_ARRAY_ITEM  pev_iuser1
@@ -183,7 +182,6 @@ enum _:MAIN_SETTINGS
     Float:SETTING_MAXS_CIVILIAN[3],
 
     bool:SETTING_CHARGER_LOAD,
-    bool:SETTING_CHARGER_ACTION,
     Float:SETTING_CHARGER_RANGE,
     Float:SETTING_OFFSET_BASE,
     Float:SETTING_OFFSET[2],
@@ -428,9 +426,7 @@ public plugin_init()
     RegisterHam(Ham_Killed, "player", "fwdKilled", 1)
 
     register_logevent("eventRoundStart", 2, "1=Round_Start")
-
-    if ( g_eSettings[SETTING_CHARGER_ACTION] )
-        set_task(g_eSettings[SETTING_GHOST_FREQ], "chargerTask", TASK_ACTION, .flags = "b")
+    set_task(g_eSettings[SETTING_GHOST_FREQ], "chargerTask", .flags = "b")
 
     chargerInit()
     g_iMaxPlayers = get_maxplayers()
@@ -466,12 +462,6 @@ public cmdMenu(id, iLevel, iCmd)
     if ( !cmd_access(id, iLevel, iCmd, 1)
     || !is_user_alive(id) )
         return PLUGIN_HANDLED
-
-    if ( !g_eSettings[SETTING_CHARGER_ACTION] )
-    {
-        client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_NO_ACTION")
-        return PLUGIN_HANDLED
-    }
 
     chargerSound(id, SOUND_MENU_NAV)
     chargerMenu(id, MENU_ROOT)
@@ -788,10 +778,6 @@ stock ReadFile()
                         {
                             g_eSettings[SETTING_CHARGER_LOAD] = bool:str_to_num(szValue)
                         }
-                        else if ( equali(szKey, "SETTING_CHARGER_ACTION") )
-                        {
-                            g_eSettings[SETTING_CHARGER_ACTION] = bool:str_to_num(szValue)
-                        }
                         else if ( equali(szKey, "SETTING_CHARGER_RANGE") )
                         {
                             g_eSettings[SETTING_CHARGER_RANGE] = str_to_float(szValue)
@@ -1049,17 +1035,6 @@ stock ReadFile()
         ArrayPushArray(g_aChargerConfig, eCharger)
     else
         set_fail_state("No chargers were found in the configuration file.")
-
-    if ( g_bFileWasRead )
-    {
-        if ( g_eSettings[SETTING_CHARGER_ACTION] )
-        {
-            if ( !task_exists(TASK_ACTION) )
-                set_task(g_eSettings[SETTING_GHOST_FREQ], "chargerTask", TASK_ACTION, .flags = "b")
-        }
-        else
-            remove_task(TASK_ACTION)
-    }
 
     g_bFileWasRead = true
     fclose(iFile)

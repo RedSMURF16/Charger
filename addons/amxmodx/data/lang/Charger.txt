@@ -3,7 +3,6 @@ CHARGER_CHAT_TAG                      = ^4[CHARGER]^1
 CHARGER_CHAT_LIMIT                    = You've reached the maximum number of chargers ^4%d
 CHARGER_CHAT_NO_CHARGER               = There are no chargers available
 CHARGER_CHAT_NO_DATA                  = Charger data hasn't been found
-CHARGER_CHAT_NO_ACTION                = Charger action is Disabled
 CHARGER_CHAT_CREATE_NEW               = ^3%s ^1created
 CHARGER_CHAT_REMOVE_CURRENT           = ^3%s ^1removed
 CHARGER_CHAT_REMOVE_ALL               = All chargers removed

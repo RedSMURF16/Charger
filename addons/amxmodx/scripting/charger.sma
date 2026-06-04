@@ -460,7 +460,8 @@ public plugin_end()
 public cmdMenu(id, iLevel, iCmd)
 {
     if ( !cmd_access(id, iLevel, iCmd, 1)
-    || !is_user_alive(id) )
+    || !is_user_alive(id)
+    || g_ePlayerData[id][PDATA_CHARGER_GHOST] )
         return PLUGIN_HANDLED
 
     chargerSound(id, SOUND_MENU_NAV)
@@ -2707,8 +2708,7 @@ stock chargerFlicker(iEnt)
     pev(iEnt, pev_origin, fOrigin)
 
     chargerSparks(fOrigin)
-    if ( eCharger[CHARGER_FLAGS] & FLAG_SOUND )
-        chargerSound(iEnt, SOUND_FLICKER, CHAN_VOICE, false)
+    chargerSound(iEnt, SOUND_FLICKER, CHAN_VOICE, false)
 }
 
 stock chargerExplode(eCharger[CHARGER])

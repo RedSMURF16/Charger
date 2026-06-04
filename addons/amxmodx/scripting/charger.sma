@@ -385,9 +385,9 @@ new g_szMenuHandler[][] =
 
 new g_szCN[][32] =
 {
-    "Charger_HealthCharger",
-    "Charger_HEVCharger",
-    "Charger_CIVCharger"
+    "charger_health",
+    "charger_hev",
+    "charger_civ"
 }
 
 new Array:g_aCharger,

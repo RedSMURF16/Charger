@@ -1164,6 +1164,7 @@ public menuHandlerRoot(id, menu, item)
             if ( g_iCharger >= MAX_ENT )
             {
                 client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_LIMIT", MAX_ENT)
+                chargerSound(id, SOUND_MENU_REMOVE)
             }
             else
             {
@@ -1176,6 +1177,7 @@ public menuHandlerRoot(id, menu, item)
             if ( !g_iCharger )
             {
                 client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_NO_CHARGER")
+                chargerSound(id, SOUND_MENU_REMOVE)
             }
             else
             {
@@ -1200,6 +1202,7 @@ public menuHandlerRoot(id, menu, item)
             if ( !g_iCharger )
             {
                 client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_NO_CHARGER")
+                chargerSound(id, SOUND_MENU_REMOVE)
             }
             else
             {
@@ -1212,6 +1215,7 @@ public menuHandlerRoot(id, menu, item)
             if ( !g_iCharger )
             {
                 client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_NO_CHARGER")
+                chargerSound(id, SOUND_MENU_REMOVE)
             }
             else
             {
@@ -1224,6 +1228,7 @@ public menuHandlerRoot(id, menu, item)
             if ( !g_iCharger )
             {
                 client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_NO_CHARGER")
+                chargerSound(id, SOUND_MENU_REMOVE)
             }
             else
             {
@@ -2020,8 +2025,6 @@ public saveData(id)
     fclose(iFile)
 
     chargerSound(id, SOUND_MENU_NAV)
-    chargerMenu(id, MENU_ROOT)
-
     return PLUGIN_HANDLED
 }
 

@@ -1447,7 +1447,6 @@ public menuHandlerShow(id, menu, item)
             }
 
             client_print_color(0, 0, "%L %L", 0, "CHARGER_CHAT_TAG", 0, "CHARGER_CHAT_SHOW_ALL_HIDDEN")
-
             chargerSound(0, SOUND_MENU_ALERT)
             chargerMenu(id, MENU_SHOW)
         }

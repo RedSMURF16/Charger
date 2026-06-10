@@ -1244,8 +1244,7 @@ public menuHandlerRoot(id, menu, item)
 
 public menuCreate(id, iMenu)
 {
-    new eCharger[CHARGER],
-        szItem[64]
+    new eCharger[CHARGER], szItem[64]
 
     for ( new i = 0; i < g_iChargerConfig; i ++ )
     {
@@ -1254,23 +1253,6 @@ public menuCreate(id, iMenu)
         copy(szItem, charsmax(szItem), eCharger[CHARGER_NAME])
         menu_additem(iMenu, szItem)
     }
-}
-
-public menuHandlerCreate(id, menu, item)
-{
-    if ( item == MENU_EXIT
-    || !is_user_alive(id) )
-    {
-        menu_destroy(menu)
-        return PLUGIN_HANDLED
-    }
-
-    chargerCreate(id, item)
-    chargerSound(id, SOUND_MENU_NAV)
-    chargerMenu(id, MENU_ROTATE)
-
-    menu_destroy(menu)
-    return PLUGIN_HANDLED
 }
 
 public menuRemove(id, iMenu)
@@ -1343,10 +1325,10 @@ public menuHandlerRemove(id, menu, item)
                 chargerRemove(0)
             }
 
-            client_print_color(0, 0, "%L %L", 0, "CHARGER_CHAT_TAG", 0, "CHARGER_CHAT_REMOVE_ALL")
+            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_REMOVE_ALL")
             g_ePlayerData[id][PDATA_CHARGER_MENU] = 0
 
-            chargerSound(0, SOUND_MENU_ALERT)
+            chargerSound(id, SOUND_MENU_ALERT)
             chargerMenu(id, MENU_ROOT)
         }
         default:
@@ -1451,8 +1433,8 @@ public menuHandlerShow(id, menu, item)
                 ArraySetArray(g_aCharger, i, eCharger)
             }
 
-            client_print_color(0, 0, "%L %L", 0, "CHARGER_CHAT_TAG", 0, "CHARGER_CHAT_SHOW_ALL_HIDDEN")
-            chargerSound(0, SOUND_MENU_ALERT)
+            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_SHOW_ALL_HIDDEN")
+            chargerSound(id, SOUND_MENU_ALERT)
             chargerMenu(id, MENU_SHOW)
         }
         case SHOW_ALL_SHOW:
@@ -1467,9 +1449,9 @@ public menuHandlerShow(id, menu, item)
                 ArraySetArray(g_aCharger, i, eCharger)
             }
 
-            client_print_color(0, 0, "%L %L", 0, "CHARGER_CHAT_TAG", 0, "CHARGER_CHAT_SHOW_ALL_SHOWN")
+            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_SHOW_ALL_SHOWN")
 
-            chargerSound(0, SOUND_MENU_ALERT)
+            chargerSound(id, SOUND_MENU_ALERT)
             chargerMenu(id, MENU_SHOW)
         }
         case SHOW_ALL_DEFAULT:
@@ -1486,9 +1468,9 @@ public menuHandlerShow(id, menu, item)
                 ArraySetArray(g_aCharger, i, eCharger)
             }
 
-            client_print_color(0, 0, "%L %L", 0, "CHARGER_CHAT_TAG", 0, "CHARGER_CHAT_SHOW_ALL_DEFAULT")
+            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_SHOW_ALL_DEFAULT")
 
-            chargerSound(0, SOUND_MENU_ALERT)
+            chargerSound(id, SOUND_MENU_ALERT)
             chargerMenu(id, MENU_SHOW)
         }
         default:
@@ -1582,9 +1564,9 @@ public menuHandlerTeam(id, menu, item)
                 ArraySetArray(g_aCharger, i, eCharger)
             }
 
-            client_print_color(0, 0, "%L %L", 0, "CHARGER_CHAT_TAG", 0, "CHARGER_CHAT_TEAM_ALL_NONE")
+            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_TEAM_ALL_NONE")
 
-            chargerSound(0, SOUND_MENU_ALERT)
+            chargerSound(id, SOUND_MENU_ALERT)
             chargerMenu(id, MENU_TEAM)
         }
         case TEAM_ALL_T:
@@ -1596,9 +1578,9 @@ public menuHandlerTeam(id, menu, item)
                 ArraySetArray(g_aCharger, i, eCharger)
             }
 
-            client_print_color(0, 0, "%L %L", 0, "CHARGER_CHAT_TAG", 0, "CHARGER_CHAT_TEAM_ALL_T")
+            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_TEAM_ALL_T")
 
-            chargerSound(0, SOUND_MENU_ALERT)
+            chargerSound(id, SOUND_MENU_ALERT)
             chargerMenu(id, MENU_TEAM)
         }
         case TEAM_ALL_CT:
@@ -1610,9 +1592,9 @@ public menuHandlerTeam(id, menu, item)
                 ArraySetArray(g_aCharger, i, eCharger)
             }
 
-            client_print_color(0, 0, "%L %L", 0, "CHARGER_CHAT_TAG", 0, "CHARGER_CHAT_TEAM_ALL_CT")
+            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_TEAM_ALL_CT")
 
-            chargerSound(0, SOUND_MENU_ALERT)
+            chargerSound(id, SOUND_MENU_ALERT)
             chargerMenu(id, MENU_TEAM)
         }
         case TEAM_ALL_BOTH:
@@ -1624,9 +1606,9 @@ public menuHandlerTeam(id, menu, item)
                 ArraySetArray(g_aCharger, i, eCharger)
             }
 
-            client_print_color(0, 0, "%L %L", 0, "CHARGER_CHAT_TAG", 0, "CHARGER_CHAT_TEAM_ALL_BOTH")
+            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_TEAM_ALL_BOTH")
 
-            chargerSound(0, SOUND_MENU_ALERT)
+            chargerSound(id, SOUND_MENU_ALERT)
             chargerMenu(id, MENU_TEAM)
         }
         default:
@@ -1723,9 +1705,9 @@ public menuHandlerSpawn(id, menu, item)
                 ArraySetArray(g_aCharger, i, eCharger)
             }
 
-            client_print_color(0, 0, "%L %L", 0, "CHARGER_CHAT_TAG", 0, "CHARGER_CHAT_SPAWN_ALL_NEVER")
+            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_SPAWN_ALL_NEVER")
 
-            chargerSound(0, SOUND_MENU_ALERT)
+            chargerSound(id, SOUND_MENU_ALERT)
             chargerMenu(id, MENU_SPAWN)
         }
         case SPAWN_ALL_DELAY:
@@ -1742,9 +1724,9 @@ public menuHandlerSpawn(id, menu, item)
                 ArraySetArray(g_aCharger, i, eCharger)
             }
 
-            client_print_color(0, 0, "%L %L", 0, "CHARGER_CHAT_TAG", 0, "CHARGER_CHAT_SPAWN_ALL_DELAY")
+            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_SPAWN_ALL_DELAY")
 
-            chargerSound(0, SOUND_MENU_ALERT)
+            chargerSound(id, SOUND_MENU_ALERT)
             chargerMenu(id, MENU_SPAWN)
         }
         case SPAWN_ALL_ROUND_START:
@@ -1756,9 +1738,9 @@ public menuHandlerSpawn(id, menu, item)
                 ArraySetArray(g_aCharger, i, eCharger)
             }
 
-            client_print_color(0, 0, "%L %L", 0, "CHARGER_CHAT_TAG", 0, "CHARGER_CHAT_SPAWN_ALL_ROUND_START")
+            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_SPAWN_ALL_ROUND_START")
 
-            chargerSound(0, SOUND_MENU_ALERT)
+            chargerSound(id, SOUND_MENU_ALERT)
             chargerMenu(id, MENU_SPAWN)
         }
         default:

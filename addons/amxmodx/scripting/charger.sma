@@ -259,9 +259,6 @@ enum _:CHARGER
 
 enum _:PLAYER_DATA
 {
-    PDATA_NAME[MAX_VALUE_LENGTH],
-    PDATA_AUTHID[MAX_AUTHID_LENGTH],
-    PDATA_ADMIN_FLAGS,
     PDATA_CHARGER_GHOST,
     PDATA_CHARGER_MENU,
     PDATA_CHARGER_USE,
@@ -1043,9 +1040,6 @@ stock ReadFile()
 
 public client_authorized(id)
 {
-    get_user_name(id, g_ePlayerData[id][PDATA_NAME], charsmax(g_ePlayerData[][PDATA_NAME]))
-    get_user_authid(id, g_ePlayerData[id][PDATA_AUTHID], charsmax(g_ePlayerData[][PDATA_AUTHID]))
-
     set_task(DELAY_ON_CONNECT, "UpdateData", id)
 }
 
@@ -1063,13 +1057,10 @@ public client_disconnected(id)
     g_ePlayerData[id][PDATA_CHARGER_USE]    = 0
     g_ePlayerData[id][PDATA_CHARGER_ACTION] = false
     g_ePlayerData[id][PDATA_CHARGER_MENU]   = 0
-    g_ePlayerData[id][PDATA_ADMIN_FLAGS]    = 0
 }
 
 public UpdateData(id)
 {
-    get_user_name(id, g_ePlayerData[id][PDATA_NAME], charsmax(g_ePlayerData[][PDATA_NAME]))
-    g_ePlayerData[id][PDATA_ADMIN_FLAGS] = get_user_flags(id)
     g_ePlayerData[id][PDATA_OFFSET] = g_eSettings[SETTING_OFFSET_BASE]
 }
 

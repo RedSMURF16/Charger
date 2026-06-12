@@ -2017,6 +2017,7 @@ public saveData(id)
     fclose(iFile)
 
     chargerSound(id, SOUND_MENU_NAV)
+    chargerMenu(id, MENU_ROOT)
     return PLUGIN_HANDLED
 }
 

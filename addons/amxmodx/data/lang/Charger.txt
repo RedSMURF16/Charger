@@ -49,8 +49,8 @@ CHARGER_ROUND_START                   = \y[ROUND-START]
 
 CHARGER_MENU_TITLE                    = \dCharger - Version \y%s
 CHARGER_MENU_TITLE_PAGE               = \yPage:\r
-CHARGER_ROOT_CREATE                   = Create charger
-CHARGER_ROOT_REMOVE                   = Remove charger
+CHARGER_ROOT_CREATE                   = Create Charger
+CHARGER_ROOT_REMOVE                   = Remove Charger
 CHARGER_ROOT_SAVE                     = Save data
 CHARGER_ROOT_NOCLIP                   = Toggle noclip %L
 CHARGER_ROOT_GODMODE                  = Toggle godmode %L
@@ -59,10 +59,10 @@ CHARGER_ROOT_TEAM                     = Team settings
 CHARGER_ROOT_SPAWN                    = Spawn settings
 CHARGER_ROOT_ROTATE                   = Adjust rotation
 
-CHARGER_REMOVE_CURRENT                = Remove charger >> \y%s
+CHARGER_REMOVE_CURRENT                = Remove Charger >> \y%s
 CHARGER_REMOVE_ALL                    = Remove all Chargers
 
-CHARGER_SHOW_CURRENT                  = Show charger >> %s%s %L
+CHARGER_SHOW_CURRENT                  = Show Charger >> %s%s %L
 CHARGER_SHOW_ALL_HIDE                 = Hide all Chargers
 CHARGER_SHOW_ALL_SHOW                 = Show all Chargers
 CHARGER_SHOW_ALL_DEFAULT              = Reset-Visibility for all Chargers

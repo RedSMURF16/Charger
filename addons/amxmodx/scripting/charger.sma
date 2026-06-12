@@ -105,13 +105,12 @@ enum
     FLAG_BREAK          = (1 << 0),
     FLAG_EXPLODE        = (1 << 1),
     FLAG_WEAR           = (1 << 2),
-    FLAG_SOUND          = (1 << 3),
 
-    FLAG_SHOW           = (1 << 4),
-    FLAG_DEAD           = (1 << 5),
-    FLAG_GHOST          = (1 << 6),
-    FLAG_VALID          = (1 << 7),
-    FLAG_SELECT         = (1 << 8)
+    FLAG_SHOW           = (1 << 3),
+    FLAG_DEAD           = (1 << 4),
+    FLAG_GHOST          = (1 << 5),
+    FLAG_VALID          = (1 << 6),
+    FLAG_SELECT         = (1 << 7)
 }
 
 enum
@@ -660,7 +659,7 @@ stock ReadFile()
                         else if ( equali(szKey, "SETTING_DEFAULT_FLAGS") )
                         {
                             g_eSettings[SETTING_DEFAULT_FLAGS] = read_flags(szValue)
-                            g_eSettings[SETTING_DEFAULT_FLAGS] &= 15
+                            g_eSettings[SETTING_DEFAULT_FLAGS] &= 7
                         }
                         else if ( equali(szKey, "SETTING_DEFAULT_TEAM") )
                         {
@@ -925,7 +924,7 @@ stock ReadFile()
                         else if ( equali(szKey, "CHARGER_FLAGS") )
                         {
                             eCharger[CHARGER_FLAGS] = read_flags(szValue)
-                            eCharger[CHARGER_FLAGS] &= 15
+                            eCharger[CHARGER_FLAGS] &= 7
                         }
                         else if ( equali(szKey, "CHARGER_TEAM") )
                         {
@@ -1073,7 +1072,7 @@ public chargerInit()
 public chargerMenu(id, iType)
 {
     new szData[64], iMenu
-    formatex(szData, charsmax(szData), "%L^n%L", id, "CHARGER_MENU_TITLE", PLUGIN_VERSION, id, "CHARGER_MENU_TITLE_PAGE")
+    formatex(szData, charsmax(szData), "%L", id, "CHARGER_MENU_TITLE", PLUGIN_VERSION)
     iMenu = menu_create(szData, g_szMenuHandler[iType])
 
     switch( iType )
@@ -1087,6 +1086,10 @@ public chargerMenu(id, iType)
         case MENU_ROTATE: { menuRotate(id, iMenu);  format(szData, charsmax(szData), "%s^n%L", szData, id, "CHARGER_ROOT_ROTATE"); }
     }
 
+    if ( menu_pages(iMenu) > 1 )
+        format(szData, charsmax(szData), "%s^n%L", szData, id, "CHARGER_MENU_TITLE_PAGE")
+
+    menu_setprop(iMenu, MPROP_TITLE, szData)
     menu_setprop(iMenu, MPROP_EXIT, MEXIT_ALL)
     menu_setprop(iMenu, MPROP_NUMBER_COLOR, "\r")
 
@@ -1244,6 +1247,23 @@ public menuCreate(id, iMenu)
         copy(szItem, charsmax(szItem), eCharger[CHARGER_NAME])
         menu_additem(iMenu, szItem)
     }
+}
+
+public menuHandlerCreate(id, menu, item)
+{
+    if ( item == MENU_EXIT
+    || !is_user_alive(id) )
+    {
+        menu_destroy(menu)
+        return PLUGIN_HANDLED
+    }
+
+    chargerCreate(id, item)
+    chargerSound(id, SOUND_MENU_NAV)
+    chargerMenu(id, MENU_ROTATE)
+
+    menu_destroy(menu)
+    return PLUGIN_HANDLED
 }
 
 public menuRemove(id, iMenu)
@@ -1846,54 +1866,53 @@ public chargerTask()
         ArrayGetArray(g_aCharger, i, eCharger)
         bModified = false
 
-        if ( eCharger[CHARGER_FLAGS] & FLAG_SHOW
-        && eCharger[CHARGER_NEXT_REFILL]
-        && fCurrentTime >= eCharger[CHARGER_NEXT_REFILL] )
+        if ( eCharger[CHARGER_FLAGS] & FLAG_SHOW )
         {
-            chargerSetSeq(eCharger[CHARGER_ID], CHARGER_SEQ_IDLE)
-            eCharger[CHARGER_CAPACITY] = eCharger[CHARGER_CAPACITY_MAX]
-            eCharger[CHARGER_NEXT_REFILL] = 0.0
-            eCharger[CHARGER_NEXT_USE] = fCurrentTime + 0.1
-
-            if ( eCharger[CHARGER_NEXT_FLICKER] )
-                eCharger[CHARGER_NEXT_FLICKER] = fCurrentTime + random_float(4.0, 8.0)
-
-            if ( eCharger[CHARGER_FLAGS] & FLAG_SOUND )
-                chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_SHOT : SOUND_HEV_SHOT, CHAN_ITEM, false)
-
-            bModified = true
-        }
-        else if ( eCharger[CHARGER_FLAGS] & FLAG_SHOW
-        && eCharger[CHARGER_NEXT_FLICKER]
-        && fCurrentTime >= eCharger[CHARGER_NEXT_FLICKER]
-        && eCharger[CHARGER_CAPACITY] )
-        {
-            chargerFlicker(eCharger[CHARGER_ID])
-            eCharger[CHARGER_NEXT_FLICKER] = fCurrentTime + random_float(4.0, 8.0)
-
-            bModified = true
-        }
-        else if ( eCharger[CHARGER_FLAGS] & FLAG_DEAD
-        && eCharger[CHARGER_SHOW] == SHOW_DEFAULT
-        && eCharger[CHARGER_SPAWN_MODE] == SPAWN_DELAY
-        && eCharger[CHARGER_NEXT_SPAWN]
-        && fCurrentTime >= eCharger[CHARGER_NEXT_SPAWN] )
-        {
-            if ( eCharger[CHARGER_SPAWN_CHANCE] >= random_float(0.0, 1.0) )
+            if ( eCharger[CHARGER_NEXT_REFILL]
+            && fCurrentTime >= eCharger[CHARGER_NEXT_REFILL] )
             {
-                eCharger[CHARGER_FLAGS] |= FLAG_SHOW
-                eCharger[CHARGER_NEXT_SPAWN] = 0.0
+                chargerSetSeq(eCharger[CHARGER_ID], CHARGER_SEQ_IDLE)
+                eCharger[CHARGER_CAPACITY] = eCharger[CHARGER_CAPACITY_MAX]
+                eCharger[CHARGER_NEXT_REFILL] = 0.0
+                eCharger[CHARGER_NEXT_USE] = fCurrentTime + 0.1
 
-                chargerState(eCharger, true, true)
+                if ( eCharger[CHARGER_NEXT_FLICKER] )
+                    eCharger[CHARGER_NEXT_FLICKER] = fCurrentTime + random_float(4.0, 8.0)
 
-                if ( eCharger[CHARGER_FLAGS] & FLAG_SOUND )
-                    chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_SHOT : SOUND_HEV_SHOT, CHAN_ITEM, false)
+                chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_SHOT : SOUND_HEV_SHOT, CHAN_ITEM, false)
+                bModified = true
+            }
+            else if (eCharger[CHARGER_NEXT_FLICKER]
+            && fCurrentTime >= eCharger[CHARGER_NEXT_FLICKER]
+            && eCharger[CHARGER_CAPACITY] )
+            {
+                chargerFlicker(eCharger[CHARGER_ID])
+                eCharger[CHARGER_NEXT_FLICKER] = fCurrentTime + random_float(4.0, 8.0)
 
                 bModified = true
             }
-            else
+        }
+        else
+        {
+            if ( eCharger[CHARGER_FLAGS] & FLAG_DEAD
+            && eCharger[CHARGER_SHOW] == SHOW_DEFAULT
+            && eCharger[CHARGER_SPAWN_MODE] == SPAWN_DELAY
+            && eCharger[CHARGER_NEXT_SPAWN]
+            && fCurrentTime >= eCharger[CHARGER_NEXT_SPAWN] )
             {
-                eCharger[CHARGER_NEXT_SPAWN] = fCurrentTime + random_float(eCharger[CHARGER_SPAWN][0], eCharger[CHARGER_SPAWN][1])
+                if ( eCharger[CHARGER_SPAWN_CHANCE] >= random_float(0.0, 1.0) )
+                {
+                    eCharger[CHARGER_FLAGS] |= FLAG_SHOW
+                    eCharger[CHARGER_NEXT_SPAWN] = 0.0
+
+                    chargerState(eCharger, true, true)
+                    chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_SHOT : SOUND_HEV_SHOT, CHAN_ITEM, false)
+                    bModified = true
+                }
+                else
+                {
+                    eCharger[CHARGER_NEXT_SPAWN] = fCurrentTime + random_float(eCharger[CHARGER_SPAWN][0], eCharger[CHARGER_SPAWN][1])
+                }
             }
         }
 
@@ -2151,8 +2170,11 @@ public fwdAddToFullPack(es, e, iEnt, iHost, iHostFlags, iPlayer, pSet)
     || !get_orig_retval() )
         return FMRES_IGNORED
 
-    new eCharger[CHARGER], bool:bHidden
-    chargerGet(eCharger, iEnt)
+    new eCharger[CHARGER]
+    if ( chargerGet(eCharger, iEnt) == -1 )
+        return FMRES_IGNORED
+
+    new bool:bHidden
     bHidden = !(eCharger[CHARGER_FLAGS] & FLAG_SHOW)
 
     if ( !g_ePlayerData[iHost][PDATA_CHARGER_ACTION] )
@@ -2200,8 +2222,8 @@ public fwdTakeDamage(iEnt, iInflictor, iAttacker, Float:fDamage, iDamageBits)
         return HAM_IGNORED
 
     new eCharger[CHARGER], iItem
-    if ( !(eCharger[CHARGER_FLAGS] & FLAG_SHOW)
-    || (iItem = chargerGet(eCharger, iEnt)) == -1 )
+    if ( (iItem = chargerGet(eCharger, iEnt)) == -1
+    || !(eCharger[CHARGER_FLAGS] & FLAG_SHOW) )
         return HAM_IGNORED
 
     new Float:fHealth, Float:fCurrentTime
@@ -2238,14 +2260,16 @@ public fwdTraceAttack(iEnt, iAttacker, Float:fDamage, Float:fDirection[3], iTr, 
     if ( !isCharger(iEnt) )
         return HAM_IGNORED
 
-    new eCharger[CHARGER], Float:fEnd[3]
-    chargerGet(eCharger, iEnt)
+    new eCharger[CHARGER]
+    if ( chargerGet(eCharger, iEnt) == -1 )
+        return HAM_IGNORED
+
+    new Float:fEnd[3]
     get_tr2(iTr, TR_vecEndPos, fEnd)
 
     chargerParticles(fEnd)
     chargerSparks(fEnd)
-    if ( eCharger[CHARGER_FLAGS] & FLAG_SOUND )
-        chargerSound(iEnt, SOUND_METAL, CHAN_VOICE, false)
+    chargerSound(iEnt, SOUND_METAL, CHAN_VOICE, false)
 
     return HAM_IGNORED
 }
@@ -2446,8 +2470,7 @@ public chargerSupply(id, eCharger[CHARGER], iItem, Float:fCurrentTime)
                     eCharger[CHARGER_NEXT_FLICKER] = fCurrentTime + random_float(4.0, 8.0)
             }
 
-            if ( eCharger[CHARGER_FLAGS] & FLAG_SOUND )
-                chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_CHARGE : SOUND_HEV_CHARGE, CHAN_ITEM, false)
+            chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_CHARGE : SOUND_HEV_CHARGE, CHAN_ITEM, false)
         }
 
         switch( eCharger[CHARGER_MODE] )
@@ -2459,9 +2482,7 @@ public chargerSupply(id, eCharger[CHARGER], iItem, Float:fCurrentTime)
         if ( !eCharger[CHARGER_CAPACITY] )
         {
             chargerSetSeq(eCharger[CHARGER_ID], CHARGER_SEQ_OFF)
-
-            if ( eCharger[CHARGER_FLAGS] & FLAG_SOUND )
-                chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_NO : SOUND_HEV_NO, CHAN_ITEM, false)
+            chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_NO : SOUND_HEV_NO, CHAN_ITEM, false)
 
             eCharger[CHARGER_NEXT_EMPTY] = fCurrentTime + 1.0
             g_ePlayerData[id][PDATA_CHARGER_USE] = 0
@@ -2472,8 +2493,7 @@ public chargerSupply(id, eCharger[CHARGER], iItem, Float:fCurrentTime)
 
         ArraySetArray(g_aCharger, iItem, eCharger)
     }
-    else if ( fCurrentTime >= eCharger[CHARGER_NEXT_EMPTY]
-    && eCharger[CHARGER_FLAGS] & FLAG_SOUND )
+    else if ( fCurrentTime >= eCharger[CHARGER_NEXT_EMPTY] )
     {
         chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_NO : SOUND_HEV_NO, CHAN_ITEM, false)
         eCharger[CHARGER_NEXT_EMPTY] = fCurrentTime + 1.0
@@ -2608,25 +2628,24 @@ stock chargerSetAnim(eCharger[CHARGER], bool:bPlaySound = true)
         if ( eCharger[CHARGER_DELAY_ACTIVE] > 0.0 )
         {
             chargerSetSeq(eCharger[CHARGER_ID], CHARGER_SEQ_OFF)
+
             eCharger[CHARGER_CAPACITY] = 0.0
             eCharger[CHARGER_NEXT_REFILL] = get_gametime() + eCharger[CHARGER_DELAY_ACTIVE]
 
-            if ( bPlaySound && (eCharger[CHARGER_FLAGS] & FLAG_SOUND) )
+            if ( bPlaySound )
                 chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_NO : SOUND_HEV_NO, CHAN_ITEM, false)
         }
         else
         {
             chargerSetSeq(eCharger[CHARGER_ID], CHARGER_SEQ_IDLE)
-
-            if ( bPlaySound && (eCharger[CHARGER_FLAGS] & FLAG_SOUND) )
+            if ( bPlaySound )
                 chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_SHOT : SOUND_HEV_SHOT, CHAN_ITEM, false)
         }
     }
     else
     {
         chargerSetSeq(eCharger[CHARGER_ID], CHARGER_SEQ_OFF)
-
-        if ( bPlaySound && (eCharger[CHARGER_FLAGS] & FLAG_SOUND) )
+        if ( bPlaySound )
             chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_NO : SOUND_HEV_NO, CHAN_ITEM, false)
     }
 }

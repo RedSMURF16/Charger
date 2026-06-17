@@ -179,9 +179,9 @@ enum _:MAIN_SETTINGS
     Float:SETTING_DEFAULT_ACTIVE_DURATION[2],
     Float:SETTING_DEFAULT_ACTIVE_COOLDOWN[2],
 
-    Float:SETTING_DEFAULT_HEALTH,
-    Float:SETTING_DEFAULT_EXPLODE_DAMAGE,
-    Float:SETTING_DEFAULT_EXPLODE_RADIUS,
+    Float:SETTING_DEFAULT_HEALTH[2],
+    Float:SETTING_DEFAULT_EXPLODE_DAMAGE[2],
+    Float:SETTING_DEFAULT_EXPLODE_RADIUS[2],
     Float:SETTING_DEFAULT_BREAK_RATIO,
     Float:SETTING_DEFAULT_BREAK_THRESHOLD,
     Float:SETTING_DEFAULT_BREAK_CHANCE,
@@ -257,13 +257,13 @@ enum _:CHARGER
     Float:CHARGER_ACTIVE_DURATION[2],
     Float:CHARGER_ACTIVE_COOLDOWN[2],
 
-    Float:CHARGER_HEALTH,
+    Float:CHARGER_HEALTH[2],
     Float:CHARGER_OVERLOAD,
     Float:CHARGER_BREAK_RATIO,
     Float:CHARGER_BREAK_THRESHOLD,
     Float:CHARGER_BREAK_CHANCE,
-    Float:CHARGER_EXPLODE_DAMAGE,
-    Float:CHARGER_EXPLODE_RADIUS,
+    Float:CHARGER_EXPLODE_DAMAGE[2],
+    Float:CHARGER_EXPLODE_RADIUS[2],
 
     Float:CHARGER_NEXT_USE,
     Float:CHARGER_NEXT_EMPTY,
@@ -654,9 +654,12 @@ stock ReadFile()
                         eCharger[CHARGER_ACTIVE_COOLDOWN][0]    = g_eSettings[SETTING_DEFAULT_ACTIVE_COOLDOWN][0]
                         eCharger[CHARGER_ACTIVE_COOLDOWN][1]    = g_eSettings[SETTING_DEFAULT_ACTIVE_COOLDOWN][1]
 
-                        eCharger[CHARGER_HEALTH]                = g_eSettings[SETTING_DEFAULT_HEALTH]
-                        eCharger[CHARGER_EXPLODE_DAMAGE]        = g_eSettings[SETTING_DEFAULT_EXPLODE_DAMAGE]
-                        eCharger[CHARGER_EXPLODE_RADIUS]        = g_eSettings[SETTING_DEFAULT_EXPLODE_RADIUS]
+                        eCharger[CHARGER_HEALTH][0]             = g_eSettings[SETTING_DEFAULT_HEALTH][0]
+                        eCharger[CHARGER_HEALTH][1]             = g_eSettings[SETTING_DEFAULT_HEALTH][1]
+                        eCharger[CHARGER_EXPLODE_DAMAGE][0]     = g_eSettings[SETTING_DEFAULT_EXPLODE_DAMAGE][0]
+                        eCharger[CHARGER_EXPLODE_DAMAGE][1]     = g_eSettings[SETTING_DEFAULT_EXPLODE_DAMAGE][1]
+                        eCharger[CHARGER_EXPLODE_RADIUS][0]     = g_eSettings[SETTING_DEFAULT_EXPLODE_RADIUS][0]
+                        eCharger[CHARGER_EXPLODE_RADIUS][1]     = g_eSettings[SETTING_DEFAULT_EXPLODE_RADIUS][1]
                         eCharger[CHARGER_BREAK_RATIO]           = g_eSettings[SETTING_DEFAULT_BREAK_RATIO]
                         eCharger[CHARGER_BREAK_THRESHOLD]       = g_eSettings[SETTING_DEFAULT_BREAK_THRESHOLD]
                         eCharger[CHARGER_BREAK_CHANCE]          = g_eSettings[SETTING_DEFAULT_BREAK_CHANCE]
@@ -780,15 +783,21 @@ stock ReadFile()
                         }
                         else if ( equali(szKey, "SETTING_DEFAULT_HEALTH") )
                         {
-                            g_eSettings[SETTING_DEFAULT_HEALTH] = str_to_float(szValue)
+                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
+                            g_eSettings[SETTING_DEFAULT_HEALTH][0] = str_to_float(szKey)
+                            g_eSettings[SETTING_DEFAULT_HEALTH][1] = str_to_float(szValue)
                         }
                         else if ( equali(szKey, "SETTING_DEFAULT_EXPLODE_DAMAGE") )
                         {
-                            g_eSettings[SETTING_DEFAULT_EXPLODE_DAMAGE] = str_to_float(szValue)
+                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
+                            g_eSettings[SETTING_DEFAULT_EXPLODE_DAMAGE][0] = str_to_float(szKey)
+                            g_eSettings[SETTING_DEFAULT_EXPLODE_DAMAGE][1] = str_to_float(szValue)
                         }
                         else if ( equali(szKey, "SETTING_DEFAULT_EXPLODE_RADIUS") )
                         {
-                            g_eSettings[SETTING_DEFAULT_EXPLODE_RADIUS] = str_to_float(szValue)
+                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
+                            g_eSettings[SETTING_DEFAULT_EXPLODE_RADIUS][0] = str_to_float(szKey)
+                            g_eSettings[SETTING_DEFAULT_EXPLODE_RADIUS][1] = str_to_float(szValue)
                         }
                         else if ( equali(szKey, "SETTING_DEFAULT_BREAK_RATIO") )
                         {
@@ -1095,18 +1104,30 @@ stock ReadFile()
                         }
                         else if ( equali(szKey, "CHARGER_HEALTH") )
                         {
-                            eCharger[CHARGER_HEALTH] = str_to_float(szValue)
-                            if ( eCharger[CHARGER_HEALTH] < 0.0 ) eCharger[CHARGER_HEALTH] = g_eSettings[SETTING_DEFAULT_HEALTH]
+                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
+                            eCharger[CHARGER_HEALTH][0] = str_to_float(szKey)
+                            eCharger[CHARGER_HEALTH][1] = str_to_float(szValue)
+
+                            if ( eCharger[CHARGER_HEALTH][0] < 0.0 ) eCharger[CHARGER_HEALTH][0] = g_eSettings[SETTING_DEFAULT_HEALTH][0]
+                            if ( eCharger[CHARGER_HEALTH][1] < 0.0 ) eCharger[CHARGER_HEALTH][1] = g_eSettings[SETTING_DEFAULT_HEALTH][1]
                         }
                         else if ( equali(szKey, "CHARGER_EXPLODE_DAMAGE") )
                         {
-                            eCharger[CHARGER_EXPLODE_DAMAGE] = str_to_float(szValue)
-                            if ( eCharger[CHARGER_EXPLODE_DAMAGE] < 0.0 ) eCharger[CHARGER_EXPLODE_DAMAGE] = g_eSettings[SETTING_DEFAULT_EXPLODE_DAMAGE]
+                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
+                            eCharger[CHARGER_EXPLODE_DAMAGE][0] = str_to_float(szKey)
+                            eCharger[CHARGER_EXPLODE_DAMAGE][1] = str_to_float(szValue)
+
+                            if ( eCharger[CHARGER_EXPLODE_DAMAGE][0] < 0.0 ) eCharger[CHARGER_EXPLODE_DAMAGE][0] = g_eSettings[SETTING_DEFAULT_EXPLODE_DAMAGE][0]
+                            if ( eCharger[CHARGER_EXPLODE_DAMAGE][1] < 0.0 ) eCharger[CHARGER_EXPLODE_DAMAGE][1] = g_eSettings[SETTING_DEFAULT_EXPLODE_DAMAGE][1]
                         }
                         else if ( equali(szKey, "CHARGER_EXPLODE_RADIUS") )
                         {
-                            eCharger[CHARGER_EXPLODE_RADIUS] = str_to_float(szValue)
-                            if ( eCharger[CHARGER_EXPLODE_RADIUS] < 0.0 ) eCharger[CHARGER_EXPLODE_RADIUS] = g_eSettings[SETTING_DEFAULT_EXPLODE_RADIUS]
+                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
+                            eCharger[CHARGER_EXPLODE_RADIUS][0] = str_to_float(szKey)
+                            eCharger[CHARGER_EXPLODE_RADIUS][1] = str_to_float(szValue)
+
+                            if ( eCharger[CHARGER_EXPLODE_RADIUS][0] < 0.0 ) eCharger[CHARGER_EXPLODE_RADIUS][0] = g_eSettings[SETTING_DEFAULT_EXPLODE_RADIUS][0]
+                            if ( eCharger[CHARGER_EXPLODE_RADIUS][1] < 0.0 ) eCharger[CHARGER_EXPLODE_RADIUS][1] = g_eSettings[SETTING_DEFAULT_EXPLODE_RADIUS][1]
                         }
                         else if ( equali(szKey, "CHARGER_BREAK_RATIO") )
                         {
@@ -1404,6 +1425,7 @@ public menuStatus(id, iMenu)
     formatex(szItem, charsmax(szItem), "%L", id, "CHARGER_STATUS_ALL_DEFAULT")
     menu_additem(iMenu, szItem)
 
+    g_ePlayerData[id][PDATA_CHARGER_ACTION] = true
     eCharger[CHARGER_FLAGS] |= FLAG_SELECT
     ArraySetArray(g_aCharger, g_ePlayerData[id][PDATA_CHARGER_MENU], eCharger)
 }
@@ -1510,6 +1532,7 @@ public menuHandlerStatus(id, menu, item)
         }
         default:
         {
+            g_ePlayerData[id][PDATA_CHARGER_ACTION] = false
             g_ePlayerData[id][PDATA_CHARGER_MENU] = 0
         }
     }
@@ -2947,7 +2970,7 @@ stock chargerSetSolid(eCharger[CHARGER])
     set_pev(eCharger[CHARGER_ID], pev_solid, SOLID_BBOX)
     set_pev(eCharger[CHARGER_ID], pev_movetype, MOVETYPE_NONE)
     set_pev(eCharger[CHARGER_ID], pev_takedamage, DAMAGE_AIM)
-    set_pev(eCharger[CHARGER_ID], pev_health, eCharger[CHARGER_HEALTH])
+    set_pev(eCharger[CHARGER_ID], pev_health, random_float(eCharger[CHARGER_HEALTH][0], eCharger[CHARGER_HEALTH][1]))
 
     xs_vec_copy(eCharger[CHARGER_MINS], fMins)
     xs_vec_copy(eCharger[CHARGER_MAXS], fMaxs)
@@ -2996,9 +3019,10 @@ stock chargerFlicker(iEnt)
 
 stock chargerExplode(eCharger[CHARGER])
 {
-    new Float:fDistance, Float:fRatio, Float:fDamage,
+    new Float:fDistance, Float:fRatio, Float:fDamage, Float:fRadius,
         Float:fVec1[3], Float:fVec2[3], iEnt = -1
 
+    fRadius = random_float(eCharger[CHARGER_EXPLODE_RADIUS][0], eCharger[CHARGER_EXPLODE_RADIUS][1])
     xs_vec_copy(eCharger[CHARGER_ORIGIN], fVec1)
     message_begin_f(MSG_PVS, SVC_TEMPENTITY, fVec1)
     write_byte(TE_EXPLOSION)
@@ -3006,7 +3030,7 @@ stock chargerExplode(eCharger[CHARGER])
     write_coord_f(fVec1[1])
     write_coord_f(fVec1[2])
     write_short(g_eSettings[SETTING_SPRITE_ZEROGXPLODE])
-    write_byte(floatround(eCharger[CHARGER_EXPLODE_RADIUS] / 15.0))
+    write_byte(floatround(fRadius / 15.0))
     write_byte(15)
     write_byte(TE_EXPLFLAG_NONE)
     message_end()
@@ -3025,7 +3049,7 @@ stock chargerExplode(eCharger[CHARGER])
     write_byte(random_num(46, 48))
     message_end()
 
-    while ( (iEnt = engfunc(EngFunc_FindEntityInSphere, iEnt, eCharger[CHARGER_ORIGIN], eCharger[CHARGER_EXPLODE_RADIUS])) )
+    while ( (iEnt = engfunc(EngFunc_FindEntityInSphere, iEnt, eCharger[CHARGER_ORIGIN], fRadius)) )
     {
         if ( !pev_valid(iEnt)
         || pev(iEnt, pev_takedamage) == DAMAGE_NO
@@ -3038,11 +3062,11 @@ stock chargerExplode(eCharger[CHARGER])
         xs_vec_mul_scalar(fVec1, 0.5, fVec1)
 
         fDistance = xs_vec_distance(eCharger[CHARGER_ORIGIN], fVec1)
-        if ( fDistance > eCharger[CHARGER_EXPLODE_RADIUS] )
+        if ( fDistance > fRadius )
             continue
 
-        fRatio = 1.0 - fDistance / eCharger[CHARGER_EXPLODE_RADIUS]
-        fDamage = eCharger[CHARGER_EXPLODE_DAMAGE] * fRatio
+        fRatio = 1.0 - (fDistance / fRadius)
+        fDamage = random_float(eCharger[CHARGER_EXPLODE_DAMAGE][0], eCharger[CHARGER_EXPLODE_DAMAGE][1]) * fRatio
 
         fakedamage(iEnt, "weapon_hegrenade", fDamage, DMG_GRENADE)
     }
@@ -3081,7 +3105,7 @@ stock chargerState(eCharger[CHARGER], bool:bShow, bool:bFlag)
 
         if ( bFlag )
         {
-            set_pev(eCharger[CHARGER_ID], pev_health, eCharger[CHARGER_HEALTH])
+            set_pev(eCharger[CHARGER_ID], pev_health, random_float(eCharger[CHARGER_HEALTH][0], eCharger[CHARGER_HEALTH][1]))
             eCharger[CHARGER_CAPACITY] = eCharger[CHARGER_CAPACITY_MAX]
 
             eCharger[CHARGER_FLAGS] &= ~FLAG_DEAD

@@ -35,7 +35,7 @@
 *       v2.0: Redesigned charger architecture for full dynamic control.
 *             Chargers now support runtime management of visibility, team and spawn settings.
 *       v2.1: Bug fixes and config improvements.
-*       v2.2: added FLAG_ACTIVE_PERMANENT, improved round-start logic.
+*       v2.2: added FLAG_ACTIVE_DURATION, improved round-start logic.
 *
 */
 
@@ -104,7 +104,7 @@ enum
     FLAG_WEAR               = (1 << 2),
     FLAG_REFILL             = (1 << 3),
     FLAG_ACTIVE_DELAY       = (1 << 4),
-    FLAG_ACTIVE_PERMANENT   = (1 << 5),
+    FLAG_ACTIVE_DURATION    = (1 << 5),
 
     FLAG_SHOW               = (1 << 6),
     FLAG_DEAD               = (1 << 7),
@@ -2187,7 +2187,7 @@ public chargerTask()
                     eCharger[CHARGER_FLAGS] |= FLAG_ACTIVE
                     eCharger[CHARGER_NEXT_ENABLE] = 0.0
 
-                    if ( !(eCharger[CHARGER_FLAGS] & FLAG_ACTIVE_PERMANENT) )
+                    if ( eCharger[CHARGER_FLAGS] & FLAG_ACTIVE_DURATION )
                         eCharger[CHARGER_NEXT_DISABLE] = fCurrentTime + random_float(eCharger[CHARGER_ACTIVE_DURATION][0], eCharger[CHARGER_ACTIVE_DURATION][1])
 
                     chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_SHOT : SOUND_HEV_SHOT, CHAN_ITEM, false)
@@ -2948,6 +2948,8 @@ stock chargerSetAnim(eCharger[CHARGER], bool:bPlaySound = true)
         else
         {
             chargerSetSeq(eCharger[CHARGER_ID], CHARGER_SEQ_IDLE)
+            if ( eCharger[CHARGER_FLAGS] & FLAG_ACTIVE_DURATION )
+                eCharger[CHARGER_NEXT_DISABLE] = get_gametime() + random_float(eCharger[CHARGER_ACTIVE_DURATION][0], eCharger[CHARGER_ACTIVE_DURATION][1])
 
             if ( bPlaySound )
                 chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_SHOT : SOUND_HEV_SHOT, CHAN_ITEM, false)

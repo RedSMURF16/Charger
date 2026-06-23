@@ -92,6 +92,21 @@ enum
 
 enum
 {
+    DTYPE_FLOAT,
+    DTYPE_FLOAT_RANGE,
+    DTYPE_INT,
+    DTYPE_BOOL,
+    DTYPE_FLAGS,
+    DTYPE_VECTOR,
+    DTYPE_VECTOR_FLOAT,
+    DTYPE_ARRAY_SOUND,
+    DTYPE_STRING_MODEL,
+    DTYPE_STRING_SOUND,
+    DTYPE_STRING_SPRITE
+}
+
+enum
+{
     CLASS_HEALTH,
     CLASS_HEV,
     CLASS_CIV
@@ -306,9 +321,6 @@ enum
     MENU_CREATE,
     MENU_STATUS,
     MENU_REMOVE,
-    MENU_SHOW,
-    MENU_TEAM,
-    MENU_SPAWN,
     MENU_ROTATE
 }
 
@@ -319,12 +331,8 @@ enum
     ROOT_REMOVE,
     ROOT_SAVE,
 
-    ROOT_NOCLIP = 4,
-    ROOT_GODMODE,
-
-    ROOT_SHOW = 7,
-    ROOT_TEAM,
-    ROOT_SPAWN
+    ROOT_NOCLIP = 5,
+    ROOT_GODMODE
 }
 
 enum
@@ -345,40 +353,6 @@ enum
 
     REMOVE_CURRENT = 3,
     REMOVE_ALL
-}
-
-enum
-{
-    SHOW_NEXT,
-    SHOW_BACK,
-
-    SHOW_CURRENT = 3,
-    SHOW_ALL_SHOW,
-    SHOW_ALL_HIDE,
-    SHOW_ALL_DEFAULT
-}
-
-enum
-{
-    TEAM_NEXT,
-    TEAM_BACK,
-
-    TEAM_CURRENT = 3,
-    TEAM_ALL_NONE,
-    TEAM_ALL_T,
-    TEAM_ALL_CT,
-    TEAM_ALL_BOTH
-}
-
-enum
-{
-    SPAWN_NEXT,
-    SPAWN_BACK,
-
-    SPAWN_CURRENT = 3,
-    SPAWN_ALL_NEVER,
-    SPAWN_ALL_DELAY,
-    SPAWN_ALL_ROUND_START
 }
 
 enum
@@ -404,9 +378,6 @@ new g_szMenuHandler[][] =
     "menuHandlerCreate",
     "menuHandlerStatus",
     "menuHandlerRemove",
-    "menuHandlerShow",
-    "menuHandlerTeam",
-    "menuHandlerSpawn",
     "menuHandlerRotate"
 }
 
@@ -429,13 +400,6 @@ new Array:g_aCharger,
 new g_szStatus[][] = {"CHARGER_DEFAULT", "CHARGER_ENABLED", "CHARGER_DISABLED"}
 new g_szStatusChat[][] = {"CHARGER_CHAT_DEFAULT", "CHARGER_CHAT_ENABLED", "CHARGER_CHAT_DISABLED"}
 new g_szStatusColor[][] = {"\d", "\y", "\r"}
-new g_szShow[][] = {"CHARGER_DEFAULT", "CHARGER_SHOWN", "CHARGER_HIDDEN"}
-new g_szShowChat[][] = {"CHARGER_CHAT_DEFAULT", "CHARGER_CHAT_SHOWN", "CHARGER_CHAT_HIDDEN"}
-new g_szShowColor[][] = {"\d", "\y", "\r"}
-new g_szTeam[][] = {"CHARGER_NONE", "CHARGER_T", "CHARGER_CT", "CHARGER_BOTH"}
-new g_szTeamChat[][] = {"CHARGER_CHAT_NONE", "CHARGER_CHAT_T", "CHARGER_CHAT_CT", "CHARGER_CHAT_BOTH"}
-new g_szSpawn[][] = {"CHARGER_NEVER", "CHARGER_COOLDOWN", "CHARGER_ROUND_START"}
-new g_szSpawnChat[][] = {"CHARGER_CHAT_NEVER", "CHARGER_CHAT_DELAY", "CHARGER_CHAT_ROUND_START"}
 
 public plugin_init()
 {
@@ -693,457 +657,165 @@ stock ReadFile()
                     case SECTION_MAIN_SETTINGS:
                     {
                         if ( equali(szKey, "SETTING_DEFAULT_MODEL") )
-                        {
-                            copy(g_eSettings[SETTING_DEFAULT_MODEL], charsmax(g_eSettings[SETTING_DEFAULT_MODEL]), szValue)
-                            if ( !g_bFileWasRead ) precache_model(g_eSettings[SETTING_DEFAULT_MODEL])
-                        }
+                            parseSetting(DTYPE_STRING_MODEL, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_MODEL], charsmax(g_eSettings[SETTING_DEFAULT_MODEL]))
                         else if ( equali(szKey, "SETTING_DEFAULT_GIB") )
-                        {
-                            if ( !g_bFileWasRead )
-                                g_eSettings[SETTING_DEFAULT_GIB] = precache_model(szValue)
-                        }
+                            parseSetting(DTYPE_STRING_MODEL, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_GIB], charsmax(g_eSettings[SETTING_DEFAULT_GIB]))
                         else if ( equali(szKey, "SETTING_DEFAULT_CLASS") )
-                        {
-                            g_eSettings[SETTING_DEFAULT_CLASS] = str_to_num(szValue)
-                        }
+                            parseSetting(DTYPE_INT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_CLASS], charsmax(g_eSettings[SETTING_DEFAULT_CLASS]))
                         else if ( equali(szKey, "SETTING_DEFAULT_FLAGS") )
-                        {
-                            g_eSettings[SETTING_DEFAULT_FLAGS] = read_flags(szValue)
-                            g_eSettings[SETTING_DEFAULT_FLAGS] &= 63
-                        }
+                            parseSetting(DTYPE_FLAGS, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_FLAGS], charsmax(g_eSettings[SETTING_DEFAULT_FLAGS]))
                         else if ( equali(szKey, "SETTING_DEFAULT_TEAM") )
-                        {
-                            g_eSettings[SETTING_DEFAULT_TEAM] = str_to_num(szValue)
-                        }
+                            parseSetting(DTYPE_INT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_TEAM], charsmax(g_eSettings[SETTING_DEFAULT_TEAM]))
                         else if ( equali(szKey, "SETTING_DEFAULT_SOUND") )
-                        {
-                            g_eSettings[SETTING_DEFAULT_SOUND] = str_to_num(szValue)
-                        }
+                            parseSetting(DTYPE_INT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_SOUND], charsmax(g_eSettings[SETTING_DEFAULT_SOUND]))
                         else if ( equali(szKey, "SETTING_DEFAULT_MODE") )
-                        {
-                            g_eSettings[SETTING_DEFAULT_MODE] = str_to_num(szValue)
-                        }
+                            parseSetting(DTYPE_INT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_MODE], charsmax(g_eSettings[SETTING_DEFAULT_MODE]))
                         else if ( equali(szKey, "SETTING_DEFAULT_LIMIT") )
-                        {
-                            g_eSettings[SETTING_DEFAULT_LIMIT] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_LIMIT], charsmax(g_eSettings[SETTING_DEFAULT_LIMIT]))
                         else if ( equali(szKey, "SETTING_DEFAULT_CAPACITY") )
-                        {
-                            g_eSettings[SETTING_DEFAULT_CAPACITY] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_CAPACITY], charsmax(g_eSettings[SETTING_DEFAULT_CAPACITY]))
                         else if ( equali(szKey, "SETTING_DEFAULT_RATE") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_DEFAULT_RATE][0] = str_to_float(szKey)
-                            g_eSettings[SETTING_DEFAULT_RATE][1] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_RATE], charsmax(g_eSettings[SETTING_DEFAULT_RATE]))
                         else if ( equali(szKey, "SETTING_DEFAULT_REFILL") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_DEFAULT_REFILL][0] = str_to_float(szKey)
-                            g_eSettings[SETTING_DEFAULT_REFILL][1] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_REFILL], charsmax(g_eSettings[SETTING_DEFAULT_REFILL]))
                         else if ( equali(szKey, "SETTING_DEFAULT_COOLDOWN") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_DEFAULT_COOLDOWN][0] = str_to_float(szKey)
-                            g_eSettings[SETTING_DEFAULT_COOLDOWN][1] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_COOLDOWN], charsmax(g_eSettings[SETTING_DEFAULT_COOLDOWN]))
                         else if ( equali(szKey, "SETTING_DEFAULT_SPAWN_MODE") )
-                        {
-                            g_eSettings[SETTING_DEFAULT_SPAWN_MODE] = str_to_num(szValue)
-                        }
+                            parseSetting(DTYPE_INT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_SPAWN_MODE], charsmax(g_eSettings[SETTING_DEFAULT_SPAWN_MODE]))
                         else if ( equali(szKey, "SETTING_DEFAULT_SPAWN") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_DEFAULT_SPAWN][0] = str_to_float(szKey)
-                            g_eSettings[SETTING_DEFAULT_SPAWN][1] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_SPAWN], charsmax(g_eSettings[SETTING_DEFAULT_SPAWN]))
                         else if ( equali(szKey, "SETTING_DEFAULT_SPAWN_CHANCE") )
-                        {
-                            g_eSettings[SETTING_DEFAULT_SPAWN_CHANCE] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_SPAWN_CHANCE], charsmax(g_eSettings[SETTING_DEFAULT_SPAWN_CHANCE]))
                         else if ( equali(szKey, "SETTING_DEFAULT_ACTIVE_DELAY") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_DEFAULT_ACTIVE_DELAY][0] = str_to_float(szKey)
-                            g_eSettings[SETTING_DEFAULT_ACTIVE_DELAY][1] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_ACTIVE_DELAY], charsmax(g_eSettings[SETTING_DEFAULT_ACTIVE_DELAY]))
                         else if ( equali(szKey, "SETTING_DEFAULT_ACTIVE_DURATION") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_DEFAULT_ACTIVE_DURATION][0] = str_to_float(szKey)
-                            g_eSettings[SETTING_DEFAULT_ACTIVE_DURATION][1] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_ACTIVE_DURATION], charsmax(g_eSettings[SETTING_DEFAULT_ACTIVE_DURATION]))
                         else if ( equali(szKey, "SETTING_DEFAULT_ACTIVE_COOLDOWN") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_DEFAULT_ACTIVE_COOLDOWN][0] = str_to_float(szKey)
-                            g_eSettings[SETTING_DEFAULT_ACTIVE_COOLDOWN][1] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_ACTIVE_COOLDOWN], charsmax(g_eSettings[SETTING_DEFAULT_ACTIVE_COOLDOWN]))
                         else if ( equali(szKey, "SETTING_DEFAULT_HEALTH") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_DEFAULT_HEALTH][0] = str_to_float(szKey)
-                            g_eSettings[SETTING_DEFAULT_HEALTH][1] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_HEALTH], charsmax(g_eSettings[SETTING_DEFAULT_HEALTH]))
                         else if ( equali(szKey, "SETTING_DEFAULT_EXPLODE_DAMAGE") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_DEFAULT_EXPLODE_DAMAGE][0] = str_to_float(szKey)
-                            g_eSettings[SETTING_DEFAULT_EXPLODE_DAMAGE][1] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_EXPLODE_DAMAGE], charsmax(g_eSettings[SETTING_DEFAULT_EXPLODE_DAMAGE]))
                         else if ( equali(szKey, "SETTING_DEFAULT_EXPLODE_RADIUS") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_DEFAULT_EXPLODE_RADIUS][0] = str_to_float(szKey)
-                            g_eSettings[SETTING_DEFAULT_EXPLODE_RADIUS][1] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_EXPLODE_RADIUS], charsmax(g_eSettings[SETTING_DEFAULT_EXPLODE_RADIUS]))
                         else if ( equali(szKey, "SETTING_DEFAULT_BREAK_RATIO") )
-                        {
-                            g_eSettings[SETTING_DEFAULT_BREAK_RATIO] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_BREAK_RATIO], charsmax(g_eSettings[SETTING_DEFAULT_BREAK_RATIO]))
                         else if ( equali(szKey, "SETTING_DEFAULT_BREAK_THRESHOLD") )
-                        {
-                            g_eSettings[SETTING_DEFAULT_BREAK_THRESHOLD] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_BREAK_THRESHOLD], charsmax(g_eSettings[SETTING_DEFAULT_BREAK_THRESHOLD]))
                         else if ( equali(szKey, "SETTING_DEFAULT_BREAK_CHANCE") )
-                        {
-                            g_eSettings[SETTING_DEFAULT_BREAK_CHANCE] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_BREAK_CHANCE], charsmax(g_eSettings[SETTING_DEFAULT_BREAK_CHANCE]))
                         else if ( equali(szKey, "SETTING_MINS_STANDARD") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_MINS_STANDARD][0] = str_to_float(szKey)
-
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_MINS_STANDARD][1] = str_to_float(szKey)
-                            g_eSettings[SETTING_MINS_STANDARD][2] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_VECTOR_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_MINS_STANDARD], charsmax(g_eSettings[SETTING_MINS_STANDARD]))
                         else if ( equali(szKey, "SETTING_MAXS_STANDARD") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_MAXS_STANDARD][0] = str_to_float(szKey)
-
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_MAXS_STANDARD][1] = str_to_float(szKey)
-                            g_eSettings[SETTING_MAXS_STANDARD][2] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_VECTOR_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_MAXS_STANDARD], charsmax(g_eSettings[SETTING_MAXS_STANDARD]))
                         else if ( equali(szKey, "SETTING_MINS_CIVILIAN") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_MINS_CIVILIAN][0] = str_to_float(szKey)
-
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_MINS_CIVILIAN][1] = str_to_float(szKey)
-                            g_eSettings[SETTING_MINS_CIVILIAN][2] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_VECTOR_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_MINS_CIVILIAN], charsmax(g_eSettings[SETTING_MINS_CIVILIAN]))
                         else if ( equali(szKey, "SETTING_MAXS_CIVILIAN") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_MAXS_CIVILIAN][0] = str_to_float(szKey)
-
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_MAXS_CIVILIAN][1] = str_to_float(szKey)
-                            g_eSettings[SETTING_MAXS_CIVILIAN][2] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_VECTOR_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_MAXS_CIVILIAN], charsmax(g_eSettings[SETTING_MAXS_CIVILIAN]))
                         else if ( equali(szKey, "SETTING_CHARGER_LOAD") )
-                        {
-                            g_eSettings[SETTING_CHARGER_LOAD] = bool:str_to_num(szValue)
-                        }
+                            parseSetting(DTYPE_BOOL, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_CHARGER_LOAD], charsmax(g_eSettings[SETTING_CHARGER_LOAD]))
                         else if ( equali(szKey, "SETTING_CHARGER_RANGE") )
-                        {
-                            g_eSettings[SETTING_CHARGER_RANGE] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_CHARGER_RANGE], charsmax(g_eSettings[SETTING_CHARGER_RANGE]))
                         else if ( equali(szKey, "SETTING_OFFSET_BASE") )
-                        {
-                            g_eSettings[SETTING_OFFSET_BASE] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_OFFSET_BASE], charsmax(g_eSettings[SETTING_OFFSET_BASE]))
                         else if ( equali(szKey, "SETTING_OFFSET") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_OFFSET][0] = str_to_float(szKey)
-                            g_eSettings[SETTING_OFFSET][1] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_OFFSET], charsmax(g_eSettings[SETTING_OFFSET]))
                         else if ( equali(szKey, "SETTING_OFFSET_STEP") )
-                        {
-                            g_eSettings[SETTING_OFFSET_STEP] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_OFFSET_STEP], charsmax(g_eSettings[SETTING_OFFSET_STEP]))
                         else if ( equali(szKey, "SETTING_OFFSET_FREQ") )
-                        {
-                            g_eSettings[SETTING_OFFSET_FREQ] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_OFFSET_FREQ], charsmax(g_eSettings[SETTING_OFFSET_FREQ]))
                         else if ( equali(szKey, "SETTING_GHOST_FREQ") )
-                        {
-                            g_eSettings[SETTING_GHOST_FREQ] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_GHOST_FREQ], charsmax(g_eSettings[SETTING_GHOST_FREQ]))
                         else if ( equali(szKey, "SETTING_GHOST_ALPHA") )
-                        {
-                            g_eSettings[SETTING_GHOST_ALPHA] = str_to_num(szValue)
-                        }
+                            parseSetting(DTYPE_INT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_GHOST_ALPHA], charsmax(g_eSettings[SETTING_GHOST_ALPHA]))
                         else if ( equali(szKey, "SETTING_BREAK_VELO_Z") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_BREAK_VELO_Z][0] = str_to_float(szKey)
-                            g_eSettings[SETTING_BREAK_VELO_Z][1] = str_to_float(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_BREAK_VELO_Z], charsmax(g_eSettings[SETTING_BREAK_VELO_Z]))
                         else if ( equali(szKey, "SETTING_BREAK_VELO_RANDOM") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_BREAK_VELO_RANDOM][0] = str_to_num(szKey)
-                            g_eSettings[SETTING_BREAK_VELO_RANDOM][1] = str_to_num(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_BREAK_VELO_RANDOM], charsmax(g_eSettings[SETTING_BREAK_VELO_RANDOM]))
                         else if ( equali(szKey, "SETTING_BREAK_COUNT") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_BREAK_COUNT][0] = str_to_num(szKey)
-                            g_eSettings[SETTING_BREAK_COUNT][1] = str_to_num(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_BREAK_COUNT], charsmax(g_eSettings[SETTING_BREAK_COUNT]))
                         else if ( equali(szKey, "SETTING_BREAK_LIFE") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_BREAK_LIFE][0] = str_to_num(szKey)
-                            g_eSettings[SETTING_BREAK_LIFE][1] = str_to_num(szValue)
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_BREAK_LIFE], charsmax(g_eSettings[SETTING_BREAK_LIFE]))
                         else if ( equali(szKey, "SETTING_SPRITE_ZEROGXPLODE") )
-                        {
-                            if ( !g_bFileWasRead )
-                                g_eSettings[SETTING_SPRITE_ZEROGXPLODE] = precache_model(szValue)
-                        }
+                            parseSetting(DTYPE_STRING_SPRITE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_SPRITE_ZEROGXPLODE], charsmax(g_eSettings[SETTING_SPRITE_ZEROGXPLODE]))
                         else if ( equali(szKey, "SETTING_SOUND_MENU_NAV") )
-                        {
-                            copy(g_eSettings[SETTING_SOUND_MENU_NAV], charsmax(g_eSettings[SETTING_SOUND_MENU_NAV]), szValue)
-                            if ( !g_bFileWasRead ) precache_sound(szValue)
-                        }
+                            parseSetting(DTYPE_STRING_SOUND, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_SOUND_MENU_NAV], charsmax(g_eSettings[SETTING_SOUND_MENU_NAV]))
                         else if ( equali(szKey, "SETTING_SOUND_MENU_REMOVE") )
-                        {
-                            copy(g_eSettings[SETTING_SOUND_MENU_REMOVE], charsmax(g_eSettings[SETTING_SOUND_MENU_REMOVE]), szValue)
-                            if ( !g_bFileWasRead ) precache_sound(szValue)
-                        }
+                            parseSetting(DTYPE_STRING_SOUND, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_SOUND_MENU_REMOVE], charsmax(g_eSettings[SETTING_SOUND_MENU_REMOVE]))
                         else if ( equali(szKey, "SETTING_SOUND_MENU_ALERT") )
-                        {
-                            copy(g_eSettings[SETTING_SOUND_MENU_ALERT], charsmax(g_eSettings[SETTING_SOUND_MENU_ALERT]), szValue)
-                            if ( !g_bFileWasRead ) precache_sound(szValue)
-                        }
+                            parseSetting(DTYPE_STRING_SOUND, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_SOUND_MENU_ALERT], charsmax(g_eSettings[SETTING_SOUND_MENU_ALERT]))
                         else if ( equali(szKey, "SETTING_SOUND_FLICKER") )
-                        {
-                            ArrayPushString(g_eSettings[SETTING_SOUND_FLICKER], szValue)
-                            if ( !g_bFileWasRead ) precache_sound(szValue)
-                        }
+                            parseSetting(DTYPE_ARRAY_SOUND, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_SOUND_FLICKER], charsmax(g_eSettings[SETTING_SOUND_FLICKER]))
                         else if ( equali(szKey, "SETTING_SOUND_METAL") )
-                        {
-                            ArrayPushString(g_eSettings[SETTING_SOUND_METAL], szValue)
-                            if ( !g_bFileWasRead ) precache_sound(szValue)
-                        }
+                            parseSetting(DTYPE_ARRAY_SOUND, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_SOUND_METAL], charsmax(g_eSettings[SETTING_SOUND_METAL]))
                         else if ( equali(szKey, "SETTING_SOUND_HEALTH_SHOT") )
-                        {
-                            copy(g_eSettings[SETTING_SOUND_HEALTH_SHOT], charsmax(g_eSettings[SETTING_SOUND_HEALTH_SHOT]), szValue)
-                            if ( !g_bFileWasRead ) precache_sound(g_eSettings[SETTING_SOUND_HEALTH_SHOT])
-                        }
+                            parseSetting(DTYPE_STRING_SOUND, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_SOUND_HEALTH_SHOT], charsmax(g_eSettings[SETTING_SOUND_HEALTH_SHOT]))
                         else if ( equali(szKey, "SETTING_SOUND_HEALTH_NO") )
-                        {
-                            copy(g_eSettings[SETTING_SOUND_HEALTH_NO], charsmax(g_eSettings[SETTING_SOUND_HEALTH_NO]), szValue)
-                            if ( !g_bFileWasRead ) precache_sound(g_eSettings[SETTING_SOUND_HEALTH_NO])
-                        }
+                            parseSetting(DTYPE_STRING_SOUND, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_SOUND_HEALTH_NO], charsmax(g_eSettings[SETTING_SOUND_HEALTH_NO]))
                         else if ( equali(szKey, "SETTING_SOUND_HEALTH_CHARGE") )
-                        {
-                            copy(g_eSettings[SETTING_SOUND_HEALTH_CHARGE], charsmax(g_eSettings[SETTING_SOUND_HEALTH_CHARGE]), szValue)
-                            if ( !g_bFileWasRead ) precache_sound(g_eSettings[SETTING_SOUND_HEALTH_CHARGE])
-                        }
+                            parseSetting(DTYPE_STRING_SOUND, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_SOUND_HEALTH_CHARGE], charsmax(g_eSettings[SETTING_SOUND_HEALTH_CHARGE]))
                         else if ( equali(szKey, "SETTING_SOUND_HEV_SHOT") )
-                        {
-                            copy(g_eSettings[SETTING_SOUND_HEV_SHOT], charsmax(g_eSettings[SETTING_SOUND_HEV_SHOT]), szValue)
-                            if ( !g_bFileWasRead ) precache_sound(g_eSettings[SETTING_SOUND_HEV_SHOT])
-                        }
+                            parseSetting(DTYPE_STRING_SOUND, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_SOUND_HEV_SHOT], charsmax(g_eSettings[SETTING_SOUND_HEV_SHOT]))
                         else if ( equali(szKey, "SETTING_SOUND_HEV_NO") )
-                        {
-                            copy(g_eSettings[SETTING_SOUND_HEV_NO], charsmax(g_eSettings[SETTING_SOUND_HEV_NO]), szValue)
-                            if ( !g_bFileWasRead ) precache_sound(g_eSettings[SETTING_SOUND_HEV_NO])
-                        }
+                            parseSetting(DTYPE_STRING_SOUND, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_SOUND_HEV_NO], charsmax(g_eSettings[SETTING_SOUND_HEV_NO]))
                         else if ( equali(szKey, "SETTING_SOUND_HEV_CHARGE") )
-                        {
-                            copy(g_eSettings[SETTING_SOUND_HEV_CHARGE], charsmax(g_eSettings[SETTING_SOUND_HEV_CHARGE]), szValue)
-                            if ( !g_bFileWasRead ) precache_sound(g_eSettings[SETTING_SOUND_HEV_CHARGE])
-                        }
+                            parseSetting(DTYPE_STRING_SOUND, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_SOUND_HEV_CHARGE], charsmax(g_eSettings[SETTING_SOUND_HEV_CHARGE]))
                         else if ( equali(szKey, "SETTING_COLOR_ACTIVE") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_COLOR_ACTIVE][0] = str_to_num(szKey)
-
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_COLOR_ACTIVE][1] = str_to_num(szKey)
-                            g_eSettings[SETTING_COLOR_ACTIVE][2] = str_to_num(szValue)
-                        }
+                            parseSetting(DTYPE_VECTOR, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_COLOR_ACTIVE], charsmax(g_eSettings[SETTING_COLOR_ACTIVE]))
                         else if ( equali(szKey, "SETTING_COLOR_INACTIVE") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_COLOR_INACTIVE][0] = str_to_num(szKey)
-
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            g_eSettings[SETTING_COLOR_INACTIVE][1] = str_to_num(szKey)
-                            g_eSettings[SETTING_COLOR_INACTIVE][2] = str_to_num(szValue)
-                        }
+                            parseSetting(DTYPE_VECTOR, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_COLOR_INACTIVE], charsmax(g_eSettings[SETTING_COLOR_INACTIVE]))
                     }
                     case SECTION_CHARGER:
                     {
                         if ( equali(szKey, "CHARGER_MODEL") )
-                        {
-                            copy(eCharger[CHARGER_MODEL], charsmax(eCharger[CHARGER_MODEL]), szValue)
-                            if ( !g_bFileWasRead )
-                                precache_model(szValue)
-                        }
+                            parseSetting(DTYPE_STRING_MODEL, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_MODEL], charsmax(eCharger[CHARGER_MODEL]), g_eSettings[SETTING_DEFAULT_MODEL])
                         else if ( equali(szKey, "CHARGER_CLASS") )
-                        {
-                            eCharger[CHARGER_CLASS] = str_to_num(szValue)
-                            eCharger[CHARGER_CLASS] = clamp(eCharger[CHARGER_CLASS], CLASS_HEALTH, CLASS_CIV)
-                        }
+                            parseSetting(DTYPE_INT, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_CLASS], charsmax(eCharger[CHARGER_CLASS]), g_eSettings[SETTING_DEFAULT_CLASS])
                         else if ( equali(szKey, "CHARGER_FLAGS") )
-                        {
-                            eCharger[CHARGER_FLAGS] = read_flags(szValue)
-                            eCharger[CHARGER_FLAGS] &= 63
-                        }
+                            parseSetting(DTYPE_FLAGS, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_FLAGS], charsmax(eCharger[CHARGER_FLAGS]), g_eSettings[SETTING_DEFAULT_FLAGS])
                         else if ( equali(szKey, "CHARGER_TEAM") )
-                        {
-                            eCharger[CHARGER_TEAM] = str_to_num(szValue)
-                            eCharger[CHARGER_TEAM] = clamp(eCharger[CHARGER_TEAM], TEAM_NONE, TEAM_BOTH)
-                        }
+                            parseSetting(DTYPE_INT, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_TEAM], charsmax(eCharger[CHARGER_TEAM]), g_eSettings[SETTING_DEFAULT_TEAM])
                         else if ( equali(szKey, "CHARGER_SOUND") )
-                        {
-                            eCharger[CHARGER_SOUND] = str_to_num(szValue)
-                            eCharger[CHARGER_SOUND] = clamp(eCharger[CHARGER_SOUND], SOUND_HEALTH, SOUND_HEV)
-                        }
+                            parseSetting(DTYPE_INT, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_SOUND], charsmax(eCharger[CHARGER_SOUND]), g_eSettings[SETTING_DEFAULT_SOUND])
                         else if ( equali(szKey, "CHARGER_MODE") )
-                        {
-                            eCharger[CHARGER_MODE] = str_to_num(szValue)
-                            eCharger[CHARGER_MODE] = clamp(eCharger[CHARGER_MODE], MODE_HEALTH, MODE_ARMOR)
-                        }
+                            parseSetting(DTYPE_INT, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_MODE], charsmax(eCharger[CHARGER_MODE]), g_eSettings[SETTING_DEFAULT_MODE])
                         else if ( equali(szKey, "CHARGER_LIMIT") )
-                        {
-                            eCharger[CHARGER_LIMIT] = str_to_float(szValue)
-                            if ( eCharger[CHARGER_LIMIT] < 0.0 ) eCharger[CHARGER_LIMIT] = g_eSettings[SETTING_DEFAULT_LIMIT]
-                        }
+                            parseSetting(DTYPE_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_LIMIT], charsmax(eCharger[CHARGER_LIMIT]), g_eSettings[SETTING_DEFAULT_LIMIT])
                         else if ( equali(szKey, "CHARGER_CAPACITY") )
                         {
-                            eCharger[CHARGER_CAPACITY] = str_to_float(szValue)
-                            if ( eCharger[CHARGER_CAPACITY] < 0.0 ) eCharger[CHARGER_CAPACITY] = g_eSettings[SETTING_DEFAULT_CAPACITY]
-
+                            parseSetting(DTYPE_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_CAPACITY], charsmax(eCharger[CHARGER_CAPACITY]), g_eSettings[SETTING_DEFAULT_CAPACITY])
                             eCharger[CHARGER_CAPACITY_MAX] = eCharger[CHARGER_CAPACITY]
                         }
                         else if ( equali(szKey, "CHARGER_RATE") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            eCharger[CHARGER_RATE][0] = str_to_float(szKey)
-                            eCharger[CHARGER_RATE][1] = str_to_float(szValue)
-
-                            if ( eCharger[CHARGER_RATE][0] < 0.0 ) eCharger[CHARGER_RATE][0] = g_eSettings[SETTING_DEFAULT_RATE][0]
-                            if ( eCharger[CHARGER_RATE][1] < 0.0 ) eCharger[CHARGER_RATE][1] = g_eSettings[SETTING_DEFAULT_RATE][1]
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_RATE], charsmax(eCharger[CHARGER_RATE]), g_eSettings[SETTING_DEFAULT_RATE])
                         else if ( equali(szKey, "CHARGER_REFILL") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            eCharger[CHARGER_REFILL][0] = str_to_float(szKey)
-                            eCharger[CHARGER_REFILL][1] = str_to_float(szValue)
-
-                            if ( eCharger[CHARGER_REFILL][0] < 0.0 ) eCharger[CHARGER_REFILL][0] = g_eSettings[SETTING_DEFAULT_REFILL][0]
-                            if ( eCharger[CHARGER_REFILL][1] < 0.0 ) eCharger[CHARGER_REFILL][1] = g_eSettings[SETTING_DEFAULT_REFILL][1]
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_REFILL], charsmax(eCharger[CHARGER_REFILL]), g_eSettings[SETTING_DEFAULT_REFILL])
                         else if ( equali(szKey, "CHARGER_COOLDOWN") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            eCharger[CHARGER_COOLDOWN][0] = str_to_float(szKey)
-                            eCharger[CHARGER_COOLDOWN][1] = str_to_float(szValue)
-
-                            if ( eCharger[CHARGER_COOLDOWN][0] < 0.0 ) eCharger[CHARGER_COOLDOWN][0] = g_eSettings[SETTING_DEFAULT_COOLDOWN][0]
-                            if ( eCharger[CHARGER_COOLDOWN][1] < 0.0 ) eCharger[CHARGER_COOLDOWN][1] = g_eSettings[SETTING_DEFAULT_COOLDOWN][1]
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_COOLDOWN], charsmax(eCharger[CHARGER_COOLDOWN]), g_eSettings[SETTING_DEFAULT_COOLDOWN])
                         else if ( equali(szKey, "CHARGER_SPAWN_MODE") )
-                        {
-                            eCharger[CHARGER_SPAWN_MODE] = str_to_num(szValue)
-                            eCharger[CHARGER_SPAWN_MODE] = clamp(eCharger[CHARGER_SPAWN_MODE], SPAWN_NEVER, SPAWN_ROUND_START)
-                        }
+                            parseSetting(DTYPE_INT, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_SPAWN_MODE], charsmax(eCharger[CHARGER_SPAWN_MODE]), g_eSettings[SETTING_DEFAULT_SPAWN_MODE])
                         else if ( equali(szKey, "CHARGER_SPAWN") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            eCharger[CHARGER_SPAWN][0] = str_to_float(szKey)
-                            eCharger[CHARGER_SPAWN][1] = str_to_float(szValue)
-
-                            if ( eCharger[CHARGER_SPAWN][0] < 0.0 ) eCharger[CHARGER_SPAWN][0] = g_eSettings[SETTING_DEFAULT_SPAWN][0]
-                            if ( eCharger[CHARGER_SPAWN][1] < 0.0 ) eCharger[CHARGER_SPAWN][1] = g_eSettings[SETTING_DEFAULT_SPAWN][1]
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_SPAWN], charsmax(eCharger[CHARGER_SPAWN]), g_eSettings[SETTING_DEFAULT_SPAWN])
                         else if ( equali(szKey, "CHARGER_SPAWN_CHANCE") )
-                        {
-                            eCharger[CHARGER_SPAWN_CHANCE] = str_to_float(szValue)
-                            eCharger[CHARGER_SPAWN_CHANCE] = floatclamp(eCharger[CHARGER_SPAWN_CHANCE], 0.0, 1.0)
-                        }
+                            parseSetting(DTYPE_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_SPAWN_CHANCE], charsmax(eCharger[CHARGER_SPAWN_CHANCE]), g_eSettings[SETTING_DEFAULT_SPAWN_CHANCE])
                         else if ( equali(szKey, "CHARGER_ACTIVE_DELAY") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            eCharger[CHARGER_ACTIVE_DELAY][0] = str_to_float(szKey)
-                            eCharger[CHARGER_ACTIVE_DELAY][1] = str_to_float(szValue)
-
-                            if ( eCharger[CHARGER_ACTIVE_DELAY][0] < 0.0 ) eCharger[CHARGER_ACTIVE_DELAY][0] = g_eSettings[SETTING_DEFAULT_ACTIVE_DELAY][0]
-                            if ( eCharger[CHARGER_ACTIVE_DELAY][1] < 0.0 ) eCharger[CHARGER_ACTIVE_DELAY][1] = g_eSettings[SETTING_DEFAULT_ACTIVE_DELAY][1]
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_ACTIVE_DELAY], charsmax(eCharger[CHARGER_ACTIVE_DELAY]), g_eSettings[SETTING_DEFAULT_ACTIVE_DELAY])
                         else if ( equali(szKey, "CHARGER_ACTIVE_DURATION") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            eCharger[CHARGER_ACTIVE_DURATION][0] = str_to_float(szKey)
-                            eCharger[CHARGER_ACTIVE_DURATION][1] = str_to_float(szValue)
-
-                            if ( eCharger[CHARGER_ACTIVE_DURATION][0] < 0.0 ) eCharger[CHARGER_ACTIVE_DURATION][0] = g_eSettings[SETTING_DEFAULT_ACTIVE_DURATION][0]
-                            if ( eCharger[CHARGER_ACTIVE_DURATION][1] < 0.0 ) eCharger[CHARGER_ACTIVE_DURATION][1] = g_eSettings[SETTING_DEFAULT_ACTIVE_DURATION][1]
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_ACTIVE_DURATION], charsmax(eCharger[CHARGER_ACTIVE_DURATION]), g_eSettings[SETTING_DEFAULT_ACTIVE_DURATION])
                         else if ( equali(szKey, "CHARGER_ACTIVE_COOLDOWN") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            eCharger[CHARGER_ACTIVE_COOLDOWN][0] = str_to_float(szKey)
-                            eCharger[CHARGER_ACTIVE_COOLDOWN][1] = str_to_float(szValue)
-
-                            if ( eCharger[CHARGER_ACTIVE_COOLDOWN][0] < 0.0 ) eCharger[CHARGER_ACTIVE_COOLDOWN][0] = g_eSettings[SETTING_DEFAULT_ACTIVE_COOLDOWN][0]
-                            if ( eCharger[CHARGER_ACTIVE_COOLDOWN][1] < 0.0 ) eCharger[CHARGER_ACTIVE_COOLDOWN][1] = g_eSettings[SETTING_DEFAULT_ACTIVE_COOLDOWN][1]
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_ACTIVE_COOLDOWN], charsmax(eCharger[CHARGER_ACTIVE_COOLDOWN]), g_eSettings[SETTING_DEFAULT_ACTIVE_COOLDOWN])
                         else if ( equali(szKey, "CHARGER_HEALTH") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            eCharger[CHARGER_HEALTH][0] = str_to_float(szKey)
-                            eCharger[CHARGER_HEALTH][1] = str_to_float(szValue)
-
-                            if ( eCharger[CHARGER_HEALTH][0] < 0.0 ) eCharger[CHARGER_HEALTH][0] = g_eSettings[SETTING_DEFAULT_HEALTH][0]
-                            if ( eCharger[CHARGER_HEALTH][1] < 0.0 ) eCharger[CHARGER_HEALTH][1] = g_eSettings[SETTING_DEFAULT_HEALTH][1]
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_HEALTH], charsmax(eCharger[CHARGER_HEALTH]), g_eSettings[SETTING_DEFAULT_HEALTH])
                         else if ( equali(szKey, "CHARGER_EXPLODE_DAMAGE") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            eCharger[CHARGER_EXPLODE_DAMAGE][0] = str_to_float(szKey)
-                            eCharger[CHARGER_EXPLODE_DAMAGE][1] = str_to_float(szValue)
-
-                            if ( eCharger[CHARGER_EXPLODE_DAMAGE][0] < 0.0 ) eCharger[CHARGER_EXPLODE_DAMAGE][0] = g_eSettings[SETTING_DEFAULT_EXPLODE_DAMAGE][0]
-                            if ( eCharger[CHARGER_EXPLODE_DAMAGE][1] < 0.0 ) eCharger[CHARGER_EXPLODE_DAMAGE][1] = g_eSettings[SETTING_DEFAULT_EXPLODE_DAMAGE][1]
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_EXPLODE_DAMAGE], charsmax(eCharger[CHARGER_EXPLODE_DAMAGE]), g_eSettings[SETTING_DEFAULT_EXPLODE_DAMAGE])
                         else if ( equali(szKey, "CHARGER_EXPLODE_RADIUS") )
-                        {
-                            strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ' ')
-                            eCharger[CHARGER_EXPLODE_RADIUS][0] = str_to_float(szKey)
-                            eCharger[CHARGER_EXPLODE_RADIUS][1] = str_to_float(szValue)
-
-                            if ( eCharger[CHARGER_EXPLODE_RADIUS][0] < 0.0 ) eCharger[CHARGER_EXPLODE_RADIUS][0] = g_eSettings[SETTING_DEFAULT_EXPLODE_RADIUS][0]
-                            if ( eCharger[CHARGER_EXPLODE_RADIUS][1] < 0.0 ) eCharger[CHARGER_EXPLODE_RADIUS][1] = g_eSettings[SETTING_DEFAULT_EXPLODE_RADIUS][1]
-                        }
+                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_EXPLODE_RADIUS], charsmax(eCharger[CHARGER_EXPLODE_RADIUS]), g_eSettings[SETTING_DEFAULT_EXPLODE_RADIUS])
                         else if ( equali(szKey, "CHARGER_BREAK_RATIO") )
-                        {
-                            eCharger[CHARGER_BREAK_RATIO] = str_to_float(szValue)
-                            if ( eCharger[CHARGER_BREAK_RATIO] < 0.0 || eCharger[CHARGER_BREAK_RATIO] > 100.0 ) eCharger[CHARGER_BREAK_RATIO] = g_eSettings[SETTING_DEFAULT_BREAK_RATIO]
-                        }
+                            parseSetting(DTYPE_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_BREAK_RATIO], charsmax(eCharger[CHARGER_BREAK_RATIO]), g_eSettings[SETTING_DEFAULT_BREAK_RATIO])
                         else if ( equali(szKey, "CHARGER_BREAK_THRESHOLD") )
-                        {
-                            eCharger[CHARGER_BREAK_THRESHOLD] = str_to_float(szValue)
-                            if ( eCharger[CHARGER_BREAK_THRESHOLD] < 0.0 || eCharger[CHARGER_BREAK_THRESHOLD] > 100.0 ) eCharger[CHARGER_BREAK_THRESHOLD] = g_eSettings[SETTING_DEFAULT_BREAK_THRESHOLD]
-                        }
+                            parseSetting(DTYPE_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_BREAK_THRESHOLD], charsmax(eCharger[CHARGER_BREAK_THRESHOLD]), g_eSettings[SETTING_DEFAULT_BREAK_THRESHOLD])
                         else if ( equali(szKey, "CHARGER_BREAK_CHANCE") )
-                        {
-                            eCharger[CHARGER_BREAK_CHANCE] = str_to_float(szValue)
-                            eCharger[CHARGER_BREAK_CHANCE] = floatclamp(eCharger[CHARGER_BREAK_CHANCE], 0.0, 1.0)
-                        }
+                            parseSetting(DTYPE_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_BREAK_CHANCE], charsmax(eCharger[CHARGER_BREAK_CHANCE]), g_eSettings[SETTING_DEFAULT_BREAK_CHANCE])
                     }
                 }
             }
@@ -1203,9 +875,6 @@ public chargerMenu(id, iType)
         case MENU_CREATE: { menuCreate(id, iMenu);  format(szData, charsmax(szData), "%s^n%L", szData, id, "CHARGER_ROOT_CREATE"); }
         case MENU_STATUS: { menuStatus(id, iMenu);  format(szData, charsmax(szData), "%s^n%L", szData, id, "CHARGER_ROOT_STATUS"); }
         case MENU_REMOVE: { menuRemove(id, iMenu);  format(szData, charsmax(szData), "%s^n%L", szData, id, "CHARGER_ROOT_REMOVE"); }
-        case MENU_SHOW:   { menuShow(id, iMenu);    format(szData, charsmax(szData), "%s^n%L", szData, id, "CHARGER_ROOT_SHOW"); }
-        case MENU_TEAM:   { menuTeam(id, iMenu);    format(szData, charsmax(szData), "%s^n%L", szData, id, "CHARGER_ROOT_TEAM"); }
-        case MENU_SPAWN:  { menuSpawn(id, iMenu);   format(szData, charsmax(szData), "%s^n%L", szData, id, "CHARGER_ROOT_SPAWN"); }
         case MENU_ROTATE: { menuRotate(id, iMenu);  format(szData, charsmax(szData), "%s^n%L", szData, id, "CHARGER_ROOT_ROTATE"); }
     }
 
@@ -1255,17 +924,6 @@ public menuRoot(id, iMenu)
     menu_additem(iMenu, szItem)
 
     formatex(szItem, charsmax(szItem), "%L", id, "CHARGER_ROOT_GODMODE", id, get_user_godmode(id) ? "CHARGER_ON" : "CHARGER_OFF")
-    menu_additem(iMenu, szItem)
-
-    menu_addblank2(iMenu)
-
-    formatex(szItem, charsmax(szItem), "%L", id, "CHARGER_ROOT_SHOW")
-    menu_additem(iMenu, szItem)
-
-    formatex(szItem, charsmax(szItem), "%L", id, "CHARGER_ROOT_TEAM")
-    menu_additem(iMenu, szItem)
-
-    formatex(szItem, charsmax(szItem), "%L", id, "CHARGER_ROOT_SPAWN")
     menu_additem(iMenu, szItem)
 }
 
@@ -1329,45 +987,6 @@ public menuHandlerRoot(id, menu, item)
         case ROOT_GODMODE:
         {
             chargerGodMode(id)
-        }
-        case ROOT_SHOW:
-        {
-            if ( !g_iCharger )
-            {
-                client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_NO_CHARGER")
-                chargerSound(id, SOUND_MENU_REMOVE)
-            }
-            else
-            {
-                chargerSound(id, SOUND_MENU_NAV)
-                chargerMenu(id, MENU_SHOW)
-            }
-        }
-        case ROOT_TEAM:
-        {
-            if ( !g_iCharger )
-            {
-                client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_NO_CHARGER")
-                chargerSound(id, SOUND_MENU_REMOVE)
-            }
-            else
-            {
-                chargerSound(id, SOUND_MENU_NAV)
-                chargerMenu(id, MENU_TEAM)
-            }
-        }
-        case ROOT_SPAWN:
-        {
-            if ( !g_iCharger )
-            {
-                client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_NO_CHARGER")
-                chargerSound(id, SOUND_MENU_REMOVE)
-            }
-            else
-            {
-                chargerSound(id, SOUND_MENU_NAV)
-                chargerMenu(id, MENU_SPAWN)
-            }
         }
     }
 
@@ -1627,415 +1246,6 @@ public menuHandlerRemove(id, menu, item)
     return PLUGIN_HANDLED
 }
 
-public menuShow(id, iMenu)
-{
-    new szItem[64], eCharger[CHARGER]
-
-    menuNav(id, iMenu)
-    ArrayGetArray(g_aCharger, g_ePlayerData[id][PDATA_CHARGER_MENU], eCharger)
-
-    formatex(szItem, charsmax(szItem), "%L", id, "CHARGER_SHOW_CURRENT",
-    g_szShowColor[eCharger[CHARGER_SHOW]], eCharger[CHARGER_NAME], id, g_szShow[eCharger[CHARGER_SHOW]])
-    menu_additem(iMenu, szItem)
-
-    formatex(szItem, charsmax(szItem), "%L", id, "CHARGER_SHOW_ALL_SHOW")
-    menu_additem(iMenu, szItem)
-
-    formatex(szItem, charsmax(szItem), "%L", id, "CHARGER_SHOW_ALL_HIDE")
-    menu_additem(iMenu, szItem)
-
-    formatex(szItem, charsmax(szItem), "%L", id, "CHARGER_SHOW_ALL_DEFAULT")
-    menu_additem(iMenu, szItem)
-
-    g_ePlayerData[id][PDATA_CHARGER_ACTION] = true
-    eCharger[CHARGER_FLAGS] |= FLAG_SELECT
-    ArraySetArray(g_aCharger, g_ePlayerData[id][PDATA_CHARGER_MENU], eCharger)
-}
-
-public menuHandlerShow(id, menu, item)
-{
-    new eCharger[CHARGER], Float:fCurrentTime
-
-    ArrayGetArray(g_aCharger, g_ePlayerData[id][PDATA_CHARGER_MENU], eCharger)
-    eCharger[CHARGER_FLAGS] &= ~FLAG_SELECT
-    ArraySetArray(g_aCharger, g_ePlayerData[id][PDATA_CHARGER_MENU], eCharger)
-    fCurrentTime = get_gametime()
-
-    switch( item )
-    {
-        case SHOW_NEXT:
-        {
-            if ( g_ePlayerData[id][PDATA_CHARGER_MENU] >= g_iCharger - 1 )
-                g_ePlayerData[id][PDATA_CHARGER_MENU] = 0
-            else
-                g_ePlayerData[id][PDATA_CHARGER_MENU] ++
-
-            chargerSound(id, SOUND_MENU_NAV)
-            chargerMenu(id, MENU_SHOW)
-        }
-        case SHOW_BACK:
-        {
-            if ( g_ePlayerData[id][PDATA_CHARGER_MENU] <= 0 )
-                g_ePlayerData[id][PDATA_CHARGER_MENU] = g_iCharger - 1
-            else
-                g_ePlayerData[id][PDATA_CHARGER_MENU] --
-
-            chargerSound(id, SOUND_MENU_NAV)
-            chargerMenu(id, MENU_SHOW)
-        }
-        case SHOW_CURRENT:
-        {
-            if ( ++ eCharger[CHARGER_SHOW] > SHOW_FORCE_HIDE )
-                eCharger[CHARGER_SHOW] = SHOW_DEFAULT
-
-            if ( eCharger[CHARGER_SHOW] == SHOW_FORCE_SHOW )
-                eCharger[CHARGER_FLAGS] |= FLAG_SHOW
-            else if ( eCharger[CHARGER_SHOW] == SHOW_FORCE_HIDE )
-                eCharger[CHARGER_FLAGS] &= ~FLAG_SHOW
-            else if ( eCharger[CHARGER_SHOW] == SHOW_DEFAULT
-            && eCharger[CHARGER_SPAWN_MODE] == SPAWN_DELAY
-            && eCharger[CHARGER_FLAGS] & FLAG_DEAD )
-                eCharger[CHARGER_NEXT_SPAWN] = fCurrentTime + random_float(eCharger[CHARGER_SPAWN][0], eCharger[CHARGER_SPAWN][1])
-
-            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_SHOW_CURRENT",
-            eCharger[CHARGER_NAME], id, g_szShowChat[eCharger[CHARGER_SHOW]])
-            chargerState(eCharger, eCharger[CHARGER_FLAGS] & FLAG_SHOW ? true : false, eCharger[CHARGER_FLAGS] & FLAG_DEAD ? true : false)
-            ArraySetArray(g_aCharger, g_ePlayerData[id][PDATA_CHARGER_MENU], eCharger)
-
-            chargerSound(id, SOUND_MENU_NAV)
-            chargerMenu(id, MENU_SHOW)
-        }
-        case SHOW_ALL_SHOW:
-        {
-            for ( new i = 0; i < g_iCharger; i ++ )
-            {
-                ArrayGetArray(g_aCharger, i, eCharger)
-                eCharger[CHARGER_SHOW] = SHOW_FORCE_SHOW
-                eCharger[CHARGER_FLAGS] |= FLAG_SHOW
-                chargerState(eCharger, true, eCharger[CHARGER_FLAGS] & FLAG_DEAD ? true : false)
-
-                ArraySetArray(g_aCharger, i, eCharger)
-            }
-
-            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_SHOW_ALL_SHOWN")
-
-            chargerSound(id, SOUND_MENU_ALERT)
-            chargerMenu(id, MENU_SHOW)
-        }
-        case SHOW_ALL_HIDE:
-        {
-            for ( new i = 0; i < g_iCharger; i ++ )
-            {
-                ArrayGetArray(g_aCharger, i, eCharger)
-                eCharger[CHARGER_SHOW] = SHOW_FORCE_HIDE
-                eCharger[CHARGER_FLAGS] &= ~FLAG_SHOW
-                chargerState(eCharger, false, false)
-
-                ArraySetArray(g_aCharger, i, eCharger)
-            }
-
-            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_SHOW_ALL_HIDDEN")
-            chargerSound(id, SOUND_MENU_ALERT)
-            chargerMenu(id, MENU_SHOW)
-        }
-        case SHOW_ALL_DEFAULT:
-        {
-            for ( new i = 0; i < g_iCharger; i ++ )
-            {
-                ArrayGetArray(g_aCharger, i, eCharger)
-
-                eCharger[CHARGER_SHOW] = SHOW_DEFAULT
-                if ( eCharger[CHARGER_SPAWN_MODE] == SPAWN_DELAY
-                && eCharger[CHARGER_FLAGS] & FLAG_DEAD )
-                    eCharger[CHARGER_NEXT_SPAWN] = fCurrentTime + random_float(eCharger[CHARGER_SPAWN][0], eCharger[CHARGER_SPAWN][1])
-
-                ArraySetArray(g_aCharger, i, eCharger)
-            }
-
-            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_SHOW_ALL_DEFAULT")
-
-            chargerSound(id, SOUND_MENU_ALERT)
-            chargerMenu(id, MENU_SHOW)
-        }
-        default:
-        {
-            g_ePlayerData[id][PDATA_CHARGER_MENU] = 0
-            g_ePlayerData[id][PDATA_CHARGER_ACTION] = false
-        }
-    }
-
-    menu_destroy(menu)
-    return PLUGIN_HANDLED
-}
-
-public menuTeam(id, iMenu)
-{
-    new szItem[64], eCharger[CHARGER]
-
-    menuNav(id, iMenu)
-    ArrayGetArray(g_aCharger, g_ePlayerData[id][PDATA_CHARGER_MENU], eCharger)
-
-    formatex(szItem, charsmax(szItem), "%L", id, "CHARGER_TEAM_CURRENT",
-    eCharger[CHARGER_NAME], id, g_szTeam[eCharger[CHARGER_TEAM]])
-    menu_additem(iMenu, szItem)
-
-    formatex(szItem, charsmax(szItem), "%L", id, "CHARGER_TEAM_ALL_NONE")
-    menu_additem(iMenu, szItem)
-
-    formatex(szItem, charsmax(szItem), "%L", id, "CHARGER_TEAM_ALL_T")
-    menu_additem(iMenu, szItem)
-
-    formatex(szItem, charsmax(szItem), "%L", id, "CHARGER_TEAM_ALL_CT")
-    menu_additem(iMenu, szItem)
-
-    formatex(szItem, charsmax(szItem), "%L", id, "CHARGER_TEAM_ALL_BOTH")
-    menu_additem(iMenu, szItem)
-
-    g_ePlayerData[id][PDATA_CHARGER_ACTION] = true
-    eCharger[CHARGER_FLAGS] |= FLAG_SELECT
-    ArraySetArray(g_aCharger, g_ePlayerData[id][PDATA_CHARGER_MENU], eCharger)
-}
-
-public menuHandlerTeam(id, menu, item)
-{
-    new eCharger[CHARGER]
-
-    ArrayGetArray(g_aCharger, g_ePlayerData[id][PDATA_CHARGER_MENU], eCharger)
-    eCharger[CHARGER_FLAGS] &= ~FLAG_SELECT
-    ArraySetArray(g_aCharger, g_ePlayerData[id][PDATA_CHARGER_MENU], eCharger)
-
-    switch( item )
-    {
-        case TEAM_NEXT:
-        {
-            if ( g_ePlayerData[id][PDATA_CHARGER_MENU] >= g_iCharger - 1 )
-                g_ePlayerData[id][PDATA_CHARGER_MENU] = 0
-            else
-                g_ePlayerData[id][PDATA_CHARGER_MENU] ++
-
-            chargerSound(id, SOUND_MENU_NAV)
-            chargerMenu(id, MENU_TEAM)
-        }
-        case TEAM_BACK:
-        {
-            if ( g_ePlayerData[id][PDATA_CHARGER_MENU] <= 0 )
-                g_ePlayerData[id][PDATA_CHARGER_MENU] = g_iCharger - 1
-            else
-                g_ePlayerData[id][PDATA_CHARGER_MENU] --
-
-            chargerSound(id, SOUND_MENU_NAV)
-            chargerMenu(id, MENU_TEAM)
-        }
-        case TEAM_CURRENT:
-        {
-            if ( ++ eCharger[CHARGER_TEAM] > TEAM_BOTH )
-                eCharger[CHARGER_TEAM] = TEAM_NONE
-
-            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_TEAM_CURRENT",
-            eCharger[CHARGER_NAME], id, g_szTeamChat[eCharger[CHARGER_TEAM]])
-            ArraySetArray(g_aCharger, g_ePlayerData[id][PDATA_CHARGER_MENU], eCharger)
-
-            chargerSound(id, SOUND_MENU_NAV)
-            chargerMenu(id, MENU_TEAM)
-        }
-        case TEAM_ALL_NONE:
-        {
-            for ( new i = 0; i < g_iCharger; i ++ )
-            {
-                ArrayGetArray(g_aCharger, i, eCharger)
-                eCharger[CHARGER_TEAM] = TEAM_NONE
-                ArraySetArray(g_aCharger, i, eCharger)
-            }
-
-            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_TEAM_ALL_NONE")
-
-            chargerSound(id, SOUND_MENU_ALERT)
-            chargerMenu(id, MENU_TEAM)
-        }
-        case TEAM_ALL_T:
-        {
-            for ( new i = 0; i < g_iCharger; i ++ )
-            {
-                ArrayGetArray(g_aCharger, i, eCharger)
-                eCharger[CHARGER_TEAM] = TEAM_T
-                ArraySetArray(g_aCharger, i, eCharger)
-            }
-
-            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_TEAM_ALL_T")
-
-            chargerSound(id, SOUND_MENU_ALERT)
-            chargerMenu(id, MENU_TEAM)
-        }
-        case TEAM_ALL_CT:
-        {
-            for ( new i = 0; i < g_iCharger; i ++ )
-            {
-                ArrayGetArray(g_aCharger, i, eCharger)
-                eCharger[CHARGER_TEAM] = TEAM_CT
-                ArraySetArray(g_aCharger, i, eCharger)
-            }
-
-            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_TEAM_ALL_CT")
-
-            chargerSound(id, SOUND_MENU_ALERT)
-            chargerMenu(id, MENU_TEAM)
-        }
-        case TEAM_ALL_BOTH:
-        {
-            for ( new i = 0; i < g_iCharger; i ++ )
-            {
-                ArrayGetArray(g_aCharger, i, eCharger)
-                eCharger[CHARGER_TEAM] = TEAM_BOTH
-                ArraySetArray(g_aCharger, i, eCharger)
-            }
-
-            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_TEAM_ALL_BOTH")
-
-            chargerSound(id, SOUND_MENU_ALERT)
-            chargerMenu(id, MENU_TEAM)
-        }
-        default:
-        {
-            g_ePlayerData[id][PDATA_CHARGER_MENU] = 0
-            g_ePlayerData[id][PDATA_CHARGER_ACTION] = false
-        }
-    }
-
-    menu_destroy(menu)
-    return PLUGIN_HANDLED
-}
-
-public menuSpawn(id, iMenu)
-{
-    new szItem[64], eCharger[CHARGER]
-
-    menuNav(id, iMenu)
-    ArrayGetArray(g_aCharger, g_ePlayerData[id][PDATA_CHARGER_MENU], eCharger)
-
-    formatex(szItem, charsmax(szItem), "%L", id, "CHARGER_SPAWN_CURRENT",
-    eCharger[CHARGER_NAME], id, g_szSpawn[eCharger[CHARGER_SPAWN_MODE]])
-    menu_additem(iMenu, szItem)
-
-    formatex(szItem, charsmax(szItem), "%L", id, "CHARGER_SPAWN_ALL_NEVER")
-    menu_additem(iMenu, szItem)
-
-    formatex(szItem, charsmax(szItem), "%L", id, "CHARGER_SPAWN_ALL_DELAY")
-    menu_additem(iMenu, szItem)
-
-    formatex(szItem, charsmax(szItem), "%L", id, "CHARGER_SPAWN_ALL_ROUND_START")
-    menu_additem(iMenu, szItem)
-
-    g_ePlayerData[id][PDATA_CHARGER_ACTION] = true
-    eCharger[CHARGER_FLAGS] |= FLAG_SELECT
-    ArraySetArray(g_aCharger, g_ePlayerData[id][PDATA_CHARGER_MENU], eCharger)
-}
-
-public menuHandlerSpawn(id, menu, item)
-{
-    new eCharger[CHARGER], Float:fCurrentTime
-
-    ArrayGetArray(g_aCharger, g_ePlayerData[id][PDATA_CHARGER_MENU], eCharger)
-    eCharger[CHARGER_FLAGS] &= ~FLAG_SELECT
-    ArraySetArray(g_aCharger, g_ePlayerData[id][PDATA_CHARGER_MENU], eCharger)
-    fCurrentTime = get_gametime()
-
-    switch( item )
-    {
-        case SPAWN_NEXT:
-        {
-            if ( g_ePlayerData[id][PDATA_CHARGER_MENU] >= g_iCharger - 1 )
-                g_ePlayerData[id][PDATA_CHARGER_MENU] = 0
-            else
-                g_ePlayerData[id][PDATA_CHARGER_MENU] ++
-
-            chargerSound(id, SOUND_MENU_NAV)
-            chargerMenu(id, MENU_SPAWN)
-        }
-        case SPAWN_BACK:
-        {
-            if ( g_ePlayerData[id][PDATA_CHARGER_MENU] <= 0 )
-                g_ePlayerData[id][PDATA_CHARGER_MENU] = g_iCharger - 1
-            else
-                g_ePlayerData[id][PDATA_CHARGER_MENU] --
-
-            chargerSound(id, SOUND_MENU_NAV)
-            chargerMenu(id, MENU_SPAWN)
-        }
-        case SPAWN_CURRENT:
-        {
-            if ( ++ eCharger[CHARGER_SPAWN_MODE] > SPAWN_ROUND_START )
-                eCharger[CHARGER_SPAWN_MODE] = SPAWN_NEVER
-
-            if ( eCharger[CHARGER_SHOW] == SHOW_DEFAULT
-            && eCharger[CHARGER_SPAWN_MODE] == SPAWN_DELAY
-            && eCharger[CHARGER_FLAGS] & FLAG_DEAD )
-                eCharger[CHARGER_NEXT_SPAWN] = fCurrentTime + random_float(eCharger[CHARGER_SPAWN][0], eCharger[CHARGER_SPAWN][1])
-
-            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_SPAWN_CURRENT",
-            eCharger[CHARGER_NAME], id, g_szSpawnChat[eCharger[CHARGER_SPAWN_MODE]])
-            ArraySetArray(g_aCharger, g_ePlayerData[id][PDATA_CHARGER_MENU], eCharger)
-
-            chargerSound(id, SOUND_MENU_NAV)
-            chargerMenu(id, MENU_SPAWN)
-        }
-        case SPAWN_ALL_NEVER:
-        {
-            for ( new i = 0; i < g_iCharger; i ++ )
-            {
-                ArrayGetArray(g_aCharger, i, eCharger)
-                eCharger[CHARGER_SPAWN_MODE] = SPAWN_NEVER
-                ArraySetArray(g_aCharger, i, eCharger)
-            }
-
-            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_SPAWN_ALL_NEVER")
-
-            chargerSound(id, SOUND_MENU_ALERT)
-            chargerMenu(id, MENU_SPAWN)
-        }
-        case SPAWN_ALL_DELAY:
-        {
-            for ( new i = 0; i < g_iCharger; i ++ )
-            {
-                ArrayGetArray(g_aCharger, i, eCharger)
-
-                eCharger[CHARGER_SPAWN_MODE] = SPAWN_DELAY
-                if ( eCharger[CHARGER_SHOW] == SHOW_DEFAULT
-                && eCharger[CHARGER_FLAGS] & FLAG_DEAD )
-                    eCharger[CHARGER_NEXT_SPAWN] = fCurrentTime + random_float(eCharger[CHARGER_SPAWN][0], eCharger[CHARGER_SPAWN][1])
-
-                ArraySetArray(g_aCharger, i, eCharger)
-            }
-
-            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_SPAWN_ALL_DELAY")
-
-            chargerSound(id, SOUND_MENU_ALERT)
-            chargerMenu(id, MENU_SPAWN)
-        }
-        case SPAWN_ALL_ROUND_START:
-        {
-            for ( new i = 0; i < g_iCharger; i ++ )
-            {
-                ArrayGetArray(g_aCharger, i, eCharger)
-                eCharger[CHARGER_SPAWN_MODE] = SPAWN_ROUND_START
-                ArraySetArray(g_aCharger, i, eCharger)
-            }
-
-            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_SPAWN_ALL_ROUND_START")
-
-            chargerSound(id, SOUND_MENU_ALERT)
-            chargerMenu(id, MENU_SPAWN)
-        }
-        default:
-        {
-            g_ePlayerData[id][PDATA_CHARGER_MENU] = 0
-            g_ePlayerData[id][PDATA_CHARGER_ACTION] = false
-        }
-    }
-
-    menu_destroy(menu)
-    return PLUGIN_HANDLED
-}
-
 public menuRotate(id, iMenu)
 {
     new szItem[64]
@@ -2125,7 +1335,8 @@ public chargerTask()
 
     for ( new id = 1; id <= g_iMaxPlayers; id ++ )
     {
-        if ( !g_ePlayerData[id][PDATA_CHARGER_GHOST]
+        if ( !is_user_alive(id)
+        || !g_ePlayerData[id][PDATA_CHARGER_GHOST]
         || (iItem = chargerGet(eCharger, g_ePlayerData[id][PDATA_CHARGER_GHOST])) == -1 )
             continue
 
@@ -2160,7 +1371,7 @@ public chargerTask()
 
                     chargerSound(eCharger[CHARGER_ID], eCharger[CHARGER_SOUND] == SOUND_HEALTH ? SOUND_HEALTH_NO : SOUND_HEV_NO, CHAN_ITEM, false)
                     bModified = true
-                } 
+                }
             }
             else
             {
@@ -3179,6 +2390,78 @@ stock chargerKill(iEnt)
 {
     if (pev_valid(iEnt))
         set_pev(iEnt, pev_flags, pev(iEnt, pev_flags) | FL_KILLME)
+}
+
+stock parseSetting(iType, szKey[], iKeyLen, szValue[], iValueLen, any:output[], iOutputLen, const any:fallback[] = {0.0, 0.0})
+{
+    switch ( iType )
+    {
+        case DTYPE_FLOAT_RANGE:
+        {
+            strtok(szValue, szKey, iKeyLen, szValue, iValueLen, ' ')
+            output[0] = str_to_float(szKey)
+            output[1] = str_to_float(szValue)
+
+            if ( output[0] < 0.0 ) output[0] = fallback[0]
+            if ( output[1] < 0.0 ) output[1] = fallback[1]
+        }
+        case DTYPE_FLOAT:
+        {
+            output[0] = str_to_float(szValue)
+            if ( output[0] < 0.0 ) output[0] = fallback[0]
+        }
+        case DTYPE_INT:
+        {
+            output[0] = str_to_num(szValue)
+            if ( output[0] < 0 ) output[0] = fallback[0]
+        }
+        case DTYPE_BOOL:
+        {
+            output[0] = bool:str_to_num(szValue)
+        }
+        case DTYPE_FLAGS:
+        {
+            output[0] = read_flags(szValue)
+        }
+        case DTYPE_VECTOR:
+        {
+            strtok(szValue, szKey, iKeyLen, szValue, iValueLen, ' ')
+            output[0] = str_to_num(szKey)
+
+            strtok(szValue, szKey, iKeyLen, szValue, iValueLen, ' ')
+            output[1] = str_to_num(szKey)
+            output[2] = str_to_num(szValue)
+        }
+        case DTYPE_VECTOR_FLOAT:
+        {
+            strtok(szValue, szKey, iKeyLen, szValue, iValueLen, ' ')
+            output[0] = str_to_float(szKey)
+
+            strtok(szValue, szKey, iKeyLen, szValue, iValueLen, ' ')
+            output[1] = str_to_float(szKey)
+            output[2] = str_to_float(szValue)
+        }
+        case DTYPE_ARRAY_SOUND:
+        {
+            ArrayPushString(output[0], szValue)
+            if ( !g_bFileWasRead ) precache_sound(szValue)
+        }
+        case DTYPE_STRING_MODEL:
+        {
+            copy(output, iOutputLen, szValue)
+            if ( !g_bFileWasRead ) precache_model(szValue)
+        }
+        case DTYPE_STRING_SOUND:
+        {
+            copy(output, iOutputLen, szValue)
+            if ( !g_bFileWasRead ) precache_sound(szValue)
+        }
+        case DTYPE_STRING_SPRITE:
+        {
+            if ( !g_bFileWasRead )
+                output[0] = precache_model(szValue)
+        }
+    }
 }
 
 stock LogConfigError(const iLine, const szText[], any:...)

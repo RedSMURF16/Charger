@@ -11,49 +11,18 @@ CHARGER_CHAT_STATUS_ALL_DEFAULT       = All Chargers status reset to Default
 CHARGER_CHAT_REMOVE_CURRENT           = ^3%s ^1removed
 CHARGER_CHAT_REMOVE_ALL               = All Chargers removed
 CHARGER_CHAT_SAVE                     = Charger data saved in ^4%s
-CHARGER_CHAT_SHOW_CURRENT             = ^3%s ^1visibility is set to %L
-CHARGER_CHAT_SHOW_ALL_HIDDEN          = All Chargers are now hidden
-CHARGER_CHAT_SHOW_ALL_SHOWN           = All Chargers are now shown
-CHARGER_CHAT_SHOW_ALL_DEFAULT         = All Chargers visibility reset to Default
-CHARGER_CHAT_TEAM_CURRENT             = ^3%s ^1team is now %L
-CHARGER_CHAT_TEAM_ALL_NONE            = All Chargers team disabled for all teams
-CHARGER_CHAT_TEAM_ALL_T               = All Chargers team enabled for Terrorists
-CHARGER_CHAT_TEAM_ALL_CT              = All Chargers team enabled for Counter-Terrorists
-CHARGER_CHAT_TEAM_ALL_BOTH            = All Chargers team enabled for all teams
-CHARGER_CHAT_SPAWN_CURRENT            = ^3%s ^1spawn setting is set to %L
-CHARGER_CHAT_SPAWN_ALL_NEVER          = All Chargers spawn mode set to Never
-CHARGER_CHAT_SPAWN_ALL_DELAY          = All Chargers spawn mode set to Delay
-CHARGER_CHAT_SPAWN_ALL_ROUND_START    = All Chargers spawn mode set to Round-Start
 
 CHARGER_CHAT_ENABLED                  = Enabled
 CHARGER_CHAT_DISABLED                 = Disabled
 CHARGER_CHAT_DEFAULT                  = reset to Default
-CHARGER_CHAT_SHOWN                    = Shown
-CHARGER_CHAT_HIDDEN                   = Hidden
-CHARGER_CHAT_NONE                     = None
-CHARGER_CHAT_T                        = Terrorist
-CHARGER_CHAT_CT                       = Counter-Terrorist
-CHARGER_CHAT_BOTH                     = Both teams
-CHARGER_CHAT_NEVER                    = Never
-CHARGER_CHAT_DELAY                    = Delay
-CHARGER_CHAT_ROUND_START              = Round-Start
 
-CHARGER_NAV_NEXT                      = Next    
+CHARGER_NAV_NEXT                      = Next
 CHARGER_NAV_BACK                      = Back
 CHARGER_ON                            = \y[ON]
 CHARGER_OFF                           = \r[OFF]
-CHARGER_SHOWN                         = \y[SHOWN]
-CHARGER_HIDDEN                        = \r[HIDDEN]
 CHARGER_ENABLED                       = \y[ENABLED]
 CHARGER_DISABLED                      = \r[DISABLED]
 CHARGER_DEFAULT                       = \d[DEFAULT]
-CHARGER_NONE                          = \y[NONE]
-CHARGER_T                             = \y[T]
-CHARGER_CT                            = \y[CT]
-CHARGER_BOTH                          = \y[BOTH]
-CHARGER_NEVER                         = \y[NEVER]
-CHARGER_DELAY                         = \y[DELAY]
-CHARGER_ROUND_START                   = \y[ROUND-START]
 
 CHARGER_MENU_TITLE                    = \dCharger - Version \y%s
 CHARGER_MENU_TITLE_PAGE               = \yPage:\r
@@ -63,9 +32,6 @@ CHARGER_ROOT_REMOVE                   = Remove Charger
 CHARGER_ROOT_SAVE                     = Save data
 CHARGER_ROOT_NOCLIP                   = Toggle noclip %L
 CHARGER_ROOT_GODMODE                  = Toggle godmode %L
-CHARGER_ROOT_SHOW                     = Visibility settings
-CHARGER_ROOT_TEAM                     = Team settings
-CHARGER_ROOT_SPAWN                    = Spawn settings
 CHARGER_ROOT_ROTATE                   = Adjust rotation
 
 CHARGER_STATUS_CURRENT                = Status Charger >> %s%s %L
@@ -75,22 +41,6 @@ CHARGER_STATUS_ALL_DEFAULT            = Reset-Status for all Chargers
 
 CHARGER_REMOVE_CURRENT                = Remove Charger >> \y%s
 CHARGER_REMOVE_ALL                    = Remove all Chargers
-
-CHARGER_SHOW_CURRENT                  = Show Charger >> %s%s %L
-CHARGER_SHOW_ALL_HIDE                 = Hide all Chargers
-CHARGER_SHOW_ALL_SHOW                 = Show all Chargers
-CHARGER_SHOW_ALL_DEFAULT              = Reset-Visibility for all Chargers
-
-CHARGER_TEAM_CURRENT                  = Adjust team >> %s %L
-CHARGER_TEAM_ALL_NONE                 = Disable for all teams
-CHARGER_TEAM_ALL_T                    = Enable for Terrorists
-CHARGER_TEAM_ALL_CT                   = Enable for Counter-Terrorists
-CHARGER_TEAM_ALL_BOTH                 = Enable for all teams
-
-CHARGER_SPAWN_CURRENT                 = Adjust spawn settings >> %s %L
-CHARGER_SPAWN_ALL_NEVER               = Disable spawning
-CHARGER_SPAWN_ALL_DELAY               = All Chargers spawn with a delay
-CHARGER_SPAWN_ALL_ROUND_START         = All Chargers spawn at round start
 
 CHARGER_ROTATE_RIGHT                  = Turn right
 CHARGER_ROTATE_LEFT                   = Turn left

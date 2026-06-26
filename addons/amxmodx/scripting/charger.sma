@@ -95,6 +95,7 @@ enum
     DTYPE_FLOAT,
     DTYPE_FLOAT_RANGE,
     DTYPE_INT,
+    DTYPE_INT_RANGE,
     DTYPE_BOOL,
     DTYPE_FLAGS,
     DTYPE_VECTOR,
@@ -731,11 +732,11 @@ stock ReadFile()
                         else if ( equali(szKey, "SETTING_BREAK_VELO_Z") )
                             parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_BREAK_VELO_Z], charsmax(g_eSettings[SETTING_BREAK_VELO_Z]))
                         else if ( equali(szKey, "SETTING_BREAK_VELO_RANDOM") )
-                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_BREAK_VELO_RANDOM], charsmax(g_eSettings[SETTING_BREAK_VELO_RANDOM]))
+                            parseSetting(DTYPE_INT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_BREAK_VELO_RANDOM], charsmax(g_eSettings[SETTING_BREAK_VELO_RANDOM]))
                         else if ( equali(szKey, "SETTING_BREAK_COUNT") )
-                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_BREAK_COUNT], charsmax(g_eSettings[SETTING_BREAK_COUNT]))
+                            parseSetting(DTYPE_INT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_BREAK_COUNT], charsmax(g_eSettings[SETTING_BREAK_COUNT]))
                         else if ( equali(szKey, "SETTING_BREAK_LIFE") )
-                            parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_BREAK_LIFE], charsmax(g_eSettings[SETTING_BREAK_LIFE]))
+                            parseSetting(DTYPE_INT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_BREAK_LIFE], charsmax(g_eSettings[SETTING_BREAK_LIFE]))
                         else if ( equali(szKey, "SETTING_SPRITE_ZEROGXPLODE") )
                             parseSetting(DTYPE_STRING_SPRITE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_SPRITE_ZEROGXPLODE], charsmax(g_eSettings[SETTING_SPRITE_ZEROGXPLODE]))
                         else if ( equali(szKey, "SETTING_SOUND_MENU_NAV") )
@@ -1515,17 +1516,8 @@ public saveData(id)
         formatex(szData, charsmax(szData), "status = %d^n", eCharger[CHARGER_STATUS])
         fputs(iFile, szData)
 
-        formatex(szData, charsmax(szData), "show = %d^n", eCharger[CHARGER_SHOW])
-        fputs(iFile, szData)
-
         eCharger[CHARGER_FLAGS] &= ~(FLAG_GHOST | FLAG_SELECT | FLAG_VALID)
         formatex(szData, charsmax(szData), "flags = %d^n", eCharger[CHARGER_FLAGS])
-        fputs(iFile, szData)
-
-        formatex(szData, charsmax(szData), "team = %d^n", eCharger[CHARGER_TEAM])
-        fputs(iFile, szData)
-
-        formatex(szData, charsmax(szData), "spawn = %d^n", eCharger[CHARGER_SPAWN_MODE])
         fputs(iFile, szData)
     }
 
@@ -1542,7 +1534,7 @@ public loadData()
     new szFile[128], iFile,
         szData[64], szKey[32], szValue[32],
         Float:fOrigin[3], Float:fAngles[3], iItem,
-        iStatus, iShow, iFlags, iTeam, iSpawn, iCount = -1
+        iStatus, iFlags, iCount = -1
 
     get_mapname(szFile, charsmax(szFile))
     format(szFile, charsmax(szFile), "maps/%s_Charger.ini", szFile)
@@ -1561,7 +1553,7 @@ public loadData()
         if ( szData[0] == '[' )
         {
             if ( iCount != -1 )
-                loadDataCharger(fOrigin, fAngles, iStatus, iShow, iFlags, iTeam, iSpawn, iItem, iCount)
+                loadDataCharger(fOrigin, fAngles, iStatus, iFlags, iItem, iCount)
 
             iCount ++
         }
@@ -1597,33 +1589,21 @@ public loadData()
             {
                 iStatus = str_to_num(szValue)
             }
-            else if ( equal(szKey, "show") )
-            {
-                iShow = str_to_num(szValue)
-            }
             else if ( equal(szKey, "flags") )
             {
                 iFlags = str_to_num(szValue)
-            }
-            else if ( equal(szKey, "team") )
-            {
-                iTeam = str_to_num(szValue)
-            }
-            else if ( equal(szKey, "spawn") )
-            {
-                iSpawn = str_to_num(szValue)
             }
         }
     }
 
     if ( iCount != -1 )
-        loadDataCharger(fOrigin, fAngles, iStatus, iShow, iFlags, iTeam, iSpawn, iItem, iCount)
+        loadDataCharger(fOrigin, fAngles, iStatus, iFlags, iItem, iCount)
 
     fclose(iFile)
     return PLUGIN_HANDLED
 }
 
-stock loadDataCharger(Float:fOrigin[3], Float:fAngles[3], iStatus, iShow, iFlags, iTeam, iSpawnMode, iItem, iCount)
+stock loadDataCharger(Float:fOrigin[3], Float:fAngles[3], iStatus, iFlags, iItem, iCount)
 {
     new eCharger[CHARGER], Float:fCurrentTime
 
@@ -1638,10 +1618,7 @@ stock loadDataCharger(Float:fOrigin[3], Float:fAngles[3], iStatus, iShow, iFlags
 
     eCharger[CHARGER_NEXT_USE]   = fCurrentTime + 0.25
     eCharger[CHARGER_STATUS]     = iStatus
-    eCharger[CHARGER_SHOW]       = iShow
     eCharger[CHARGER_FLAGS]      = iFlags
-    eCharger[CHARGER_TEAM]       = iTeam
-    eCharger[CHARGER_SPAWN_MODE] = iSpawnMode
 
     if ( eCharger[CHARGER_SHOW] == SHOW_DEFAULT
     && eCharger[CHARGER_SPAWN_MODE] == SPAWN_DELAY
@@ -2414,6 +2391,15 @@ stock parseSetting(iType, szKey[], iKeyLen, szValue[], iValueLen, any:output[], 
         {
             output[0] = str_to_num(szValue)
             if ( output[0] < 0 ) output[0] = fallback[0]
+        }
+        case DTYPE_INT_RANGE:
+        {
+            strtok(szValue, szKey, iKeyLen, szValue, iValueLen, ' ')
+            output[0] = str_to_num(szKey)
+            output[1] = str_to_num(szValue)
+
+            if ( output[0] < 0 ) output[0] = fallback[0]
+            if ( output[1] < 0 ) output[1] = fallback[1]
         }
         case DTYPE_BOOL:
         {

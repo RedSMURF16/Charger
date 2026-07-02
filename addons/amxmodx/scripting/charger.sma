@@ -6,7 +6,7 @@
 *	Description:
 *   This plugin adds a dynamic charger system with a menu to select different charger types.
 *   Each charger has its own model and configurable properties such as health, capacity, team, flags, activation delay, sounds, visibility, and more.
-*   Chargers are fully manageable during gameplay, supporting respawn, visibility settings, and state transitions.
+*   Chargers are fully manageable during gameplay, supporting reCharger, visibility settings, and state transitions.
 *
 *	Cvars:
 *		None
@@ -154,9 +154,9 @@ enum
 
 enum
 {
-    SPAWN_NEVER,
-    SPAWN_DELAY,
-    SPAWN_ROUND_START
+    CHARGER_NEVER,
+    CHARGER_DELAY,
+    CHARGER_ROUND_START
 }
 
 enum
@@ -187,9 +187,9 @@ enum _:MAIN_SETTINGS
     Float:SETTING_DEFAULT_REFILL[2],
     Float:SETTING_DEFAULT_COOLDOWN[2],
 
-    SETTING_DEFAULT_SPAWN_MODE,
+    SETTING_DEFAULT_CHARGER_MODE,
     Float:SETTING_DEFAULT_SPAWN[2],
-    Float:SETTING_DEFAULT_SPAWN_CHANCE,
+    Float:SETTING_DEFAULT_CHARGER_CHANCE,
 
     Float:SETTING_DEFAULT_ACTIVE_DELAY[2],
     Float:SETTING_DEFAULT_ACTIVE_DURATION[2],
@@ -264,9 +264,9 @@ enum _:CHARGER
     Float:CHARGER_REFILL[2],
     Float:CHARGER_COOLDOWN[2],
 
-    CHARGER_SPAWN_MODE,
+    CHARGER_CHARGER_MODE,
     Float:CHARGER_SPAWN[2],
-    Float:CHARGER_SPAWN_CHANCE,
+    Float:CHARGER_CHARGER_CHANCE,
     Float:CHARGER_NEXT_SPAWN,
 
     Float:CHARGER_ACTIVE_DELAY[2],
@@ -506,13 +506,13 @@ public eventRoundStart()
         chargerReset(eCharger)
 
         if ( eCharger[CHARGER_SHOW] != SHOW_DEFAULT
-        || eCharger[CHARGER_SPAWN_MODE] != SPAWN_ROUND_START )
+        || eCharger[CHARGER_CHARGER_MODE] != CHARGER_ROUND_START )
         {
             ArraySetArray(g_aCharger, i, eCharger)
             continue
         }
 
-        if ( eCharger[CHARGER_SPAWN_CHANCE] >= random_float(0.0, 1.0) )
+        if ( eCharger[CHARGER_CHARGER_CHANCE] >= random_float(0.0, 1.0) )
         {
             eCharger[CHARGER_FLAGS] |= (FLAG_SHOW | FLAG_ACTIVE)
             chargerState(eCharger, true, true)
@@ -607,10 +607,10 @@ stock ReadFile()
                         eCharger[CHARGER_COOLDOWN][0]           = g_eSettings[SETTING_DEFAULT_COOLDOWN][0]
                         eCharger[CHARGER_COOLDOWN][1]           = g_eSettings[SETTING_DEFAULT_COOLDOWN][1]
 
-                        eCharger[CHARGER_SPAWN_MODE]            = g_eSettings[SETTING_DEFAULT_SPAWN_MODE]
+                        eCharger[CHARGER_CHARGER_MODE]            = g_eSettings[SETTING_DEFAULT_CHARGER_MODE]
                         eCharger[CHARGER_SPAWN][0]              = g_eSettings[SETTING_DEFAULT_SPAWN][0]
                         eCharger[CHARGER_SPAWN][1]              = g_eSettings[SETTING_DEFAULT_SPAWN][1]
-                        eCharger[CHARGER_SPAWN_CHANCE]          = g_eSettings[SETTING_DEFAULT_SPAWN_CHANCE]
+                        eCharger[CHARGER_CHARGER_CHANCE]          = g_eSettings[SETTING_DEFAULT_CHARGER_CHANCE]
 
                         eCharger[CHARGER_ACTIVE_DELAY][0]       = g_eSettings[SETTING_DEFAULT_ACTIVE_DELAY][0]
                         eCharger[CHARGER_ACTIVE_DELAY][1]       = g_eSettings[SETTING_DEFAULT_ACTIVE_DELAY][1]
@@ -681,12 +681,12 @@ stock ReadFile()
                             parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_REFILL], charsmax(g_eSettings[SETTING_DEFAULT_REFILL]))
                         else if ( equali(szKey, "SETTING_DEFAULT_COOLDOWN") )
                             parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_COOLDOWN], charsmax(g_eSettings[SETTING_DEFAULT_COOLDOWN]))
-                        else if ( equali(szKey, "SETTING_DEFAULT_SPAWN_MODE") )
-                            parseSetting(DTYPE_INT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_SPAWN_MODE], charsmax(g_eSettings[SETTING_DEFAULT_SPAWN_MODE]))
+                        else if ( equali(szKey, "SETTING_DEFAULT_CHARGER_MODE") )
+                            parseSetting(DTYPE_INT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_CHARGER_MODE], charsmax(g_eSettings[SETTING_DEFAULT_CHARGER_MODE]))
                         else if ( equali(szKey, "SETTING_DEFAULT_SPAWN") )
                             parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_SPAWN], charsmax(g_eSettings[SETTING_DEFAULT_SPAWN]))
-                        else if ( equali(szKey, "SETTING_DEFAULT_SPAWN_CHANCE") )
-                            parseSetting(DTYPE_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_SPAWN_CHANCE], charsmax(g_eSettings[SETTING_DEFAULT_SPAWN_CHANCE]))
+                        else if ( equali(szKey, "SETTING_DEFAULT_CHARGER_CHANCE") )
+                            parseSetting(DTYPE_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_CHARGER_CHANCE], charsmax(g_eSettings[SETTING_DEFAULT_CHARGER_CHANCE]))
                         else if ( equali(szKey, "SETTING_DEFAULT_ACTIVE_DELAY") )
                             parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), g_eSettings[SETTING_DEFAULT_ACTIVE_DELAY], charsmax(g_eSettings[SETTING_DEFAULT_ACTIVE_DELAY]))
                         else if ( equali(szKey, "SETTING_DEFAULT_ACTIVE_DURATION") )
@@ -793,12 +793,12 @@ stock ReadFile()
                             parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_REFILL], charsmax(eCharger[CHARGER_REFILL]), g_eSettings[SETTING_DEFAULT_REFILL])
                         else if ( equali(szKey, "CHARGER_COOLDOWN") )
                             parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_COOLDOWN], charsmax(eCharger[CHARGER_COOLDOWN]), g_eSettings[SETTING_DEFAULT_COOLDOWN])
-                        else if ( equali(szKey, "CHARGER_SPAWN_MODE") )
-                            parseSetting(DTYPE_INT, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_SPAWN_MODE], charsmax(eCharger[CHARGER_SPAWN_MODE]), g_eSettings[SETTING_DEFAULT_SPAWN_MODE])
+                        else if ( equali(szKey, "CHARGER_CHARGER_MODE") )
+                            parseSetting(DTYPE_INT, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_CHARGER_MODE], charsmax(eCharger[CHARGER_CHARGER_MODE]), g_eSettings[SETTING_DEFAULT_CHARGER_MODE])
                         else if ( equali(szKey, "CHARGER_SPAWN") )
                             parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_SPAWN], charsmax(eCharger[CHARGER_SPAWN]), g_eSettings[SETTING_DEFAULT_SPAWN])
-                        else if ( equali(szKey, "CHARGER_SPAWN_CHANCE") )
-                            parseSetting(DTYPE_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_SPAWN_CHANCE], charsmax(eCharger[CHARGER_SPAWN_CHANCE]), g_eSettings[SETTING_DEFAULT_SPAWN_CHANCE])
+                        else if ( equali(szKey, "CHARGER_CHARGER_CHANCE") )
+                            parseSetting(DTYPE_FLOAT, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_CHARGER_CHANCE], charsmax(eCharger[CHARGER_CHARGER_CHANCE]), g_eSettings[SETTING_DEFAULT_CHARGER_CHANCE])
                         else if ( equali(szKey, "CHARGER_ACTIVE_DELAY") )
                             parseSetting(DTYPE_FLOAT_RANGE, szKey, charsmax(szKey), szValue, charsmax(szValue), eCharger[CHARGER_ACTIVE_DELAY], charsmax(eCharger[CHARGER_ACTIVE_DELAY]), g_eSettings[SETTING_DEFAULT_ACTIVE_DELAY])
                         else if ( equali(szKey, "CHARGER_ACTIVE_DURATION") )
@@ -1336,12 +1336,18 @@ public chargerTask()
 
     for ( new id = 1; id <= g_iMaxPlayers; id ++ )
     {
-        if ( !is_user_alive(id)
-        || !g_ePlayerData[id][PDATA_CHARGER_GHOST]
-        || (iItem = chargerGet(eCharger, g_ePlayerData[id][PDATA_CHARGER_GHOST])) == -1 )
+        if ( !is_user_alive(id) )
             continue
 
-        chargerTrace(eCharger, id, iItem)
+        if ( !g_ePlayerData[id][PDATA_CHARGER_GHOST] )
+        {
+            if ( g_ePlayerData[id][PDATA_CHARGER_ACTION] )
+                chargerCheck(id)
+        }
+        else if ( (iItem = chargerGet(eCharger, g_ePlayerData[id][PDATA_CHARGER_GHOST])) != -1 )
+        {
+            chargerTrace(eCharger, id, iItem)
+        }
     }
 
     for ( new i = 0; i < g_iCharger; i ++ )
@@ -1411,11 +1417,11 @@ public chargerTask()
         {
             if ( eCharger[CHARGER_FLAGS] & FLAG_DEAD
             && eCharger[CHARGER_SHOW] == SHOW_DEFAULT
-            && eCharger[CHARGER_SPAWN_MODE] == SPAWN_DELAY
+            && eCharger[CHARGER_CHARGER_MODE] == CHARGER_DELAY
             && eCharger[CHARGER_NEXT_SPAWN]
             && fCurrentTime >= eCharger[CHARGER_NEXT_SPAWN] )
             {
-                if ( eCharger[CHARGER_SPAWN_CHANCE] >= random_float(0.0, 1.0) )
+                if ( eCharger[CHARGER_CHARGER_CHANCE] >= random_float(0.0, 1.0) )
                 {
                     eCharger[CHARGER_FLAGS] |= FLAG_SHOW
                     eCharger[CHARGER_NEXT_SPAWN] = 0.0
@@ -1541,10 +1547,7 @@ public loadData()
 
     iFile = fopen(szFile, "rt")
     if ( !iFile )
-    {
-        console_print(0, "%L %L", 0, "CHARGER_CHAT_TAG", 0, "CHARGER_CHAT_NO_DATA")
         return PLUGIN_HANDLED
-    }
 
     while( !feof(iFile) )
     {
@@ -1621,7 +1624,7 @@ stock loadDataCharger(Float:fOrigin[3], Float:fAngles[3], iStatus, iFlags, iItem
     eCharger[CHARGER_FLAGS]      = iFlags
 
     if ( eCharger[CHARGER_SHOW] == SHOW_DEFAULT
-    && eCharger[CHARGER_SPAWN_MODE] == SPAWN_DELAY
+    && eCharger[CHARGER_CHARGER_MODE] == CHARGER_DELAY
     && eCharger[CHARGER_FLAGS] & FLAG_DEAD )
         eCharger[CHARGER_NEXT_SPAWN] = fCurrentTime + random_float(eCharger[CHARGER_SPAWN][0], eCharger[CHARGER_SPAWN][1])
 
@@ -1739,7 +1742,7 @@ public fwdTakeDamage(iEnt, iInflictor, iAttacker, Float:fDamage, iDamageBits)
 
         chargerGib(eCharger[CHARGER_ID])
         if ( eCharger[CHARGER_SHOW] == SHOW_DEFAULT
-        && eCharger[CHARGER_SPAWN_MODE] == SPAWN_DELAY )
+        && eCharger[CHARGER_CHARGER_MODE] == CHARGER_DELAY )
             eCharger[CHARGER_NEXT_SPAWN] = fCurrentTime + random_float(eCharger[CHARGER_SPAWN][0], eCharger[CHARGER_SPAWN][1])
 
         if ( eCharger[CHARGER_FLAGS] & FLAG_EXPLODE )
@@ -1900,6 +1903,64 @@ public bool:chargerTrace(eCharger[CHARGER], id, iItem)
     return fFraction < 1.0
 }
 
+stock chargerCheck(id)
+{
+    new eCharger[CHARGER], Float:fVec1[3], Float:fVec2[3], Float:fForward[3]
+    new iBest, Float:fBestDist, Float:fTraceLength, Float:fDot, Float:fDist
+
+    pev(id, pev_origin, fVec1)
+    pev(id, pev_view_ofs, fVec2)
+    xs_vec_add(fVec1, fVec2, fVec1)
+
+    pev(id, pev_v_angle, fForward)
+    engfunc(EngFunc_MakeVectors, fForward)
+    global_get(glb_v_forward, fForward)
+
+    xs_vec_mul_scalar(fForward, 9999.9, fVec2)
+    xs_vec_add(fVec2, fVec1, fVec2)
+
+    engfunc(EngFunc_TraceLine, fVec1, fVec2, DONT_IGNORE_MONSTERS, id, 0)
+    get_tr2(0, TR_vecEndPos, fVec2)
+
+    iBest = -1
+    fBestDist = 20.0
+    fTraceLength = get_distance_f(fVec1, fVec2)
+
+    for ( new i = 0; i < g_iCharger; i ++ )
+    {
+        ArrayGetArray(g_aCharger, i, eCharger)
+        xs_vec_sub(eCharger[CHARGER_ORIGIN], fVec1, fVec2)
+        fDot = xs_vec_dot(fVec2, fForward)
+
+        if ( fDot < 0.0 || fDot > fTraceLength )
+            continue
+
+        xs_vec_copy(fForward, fVec2)
+        xs_vec_mul_scalar(fVec2, fDot, fVec2)
+        xs_vec_add(fVec2, fVec1, fVec2)
+
+        fDist = get_distance_f(eCharger[CHARGER_ORIGIN], fVec2)
+        if ( fDist < fBestDist )
+        {
+            fBestDist = fDist
+            iBest = i
+        }
+    }
+
+    if ( iBest != -1
+    && g_ePlayerData[id][PDATA_CHARGER_MENU] != iBest )
+    {
+        ArrayGetArray(g_aCharger, g_ePlayerData[id][PDATA_CHARGER_MENU], eCharger)
+        eCharger[CHARGER_FLAGS] &= ~FLAG_SELECT
+        ArraySetArray(g_aCharger, g_ePlayerData[id][PDATA_CHARGER_MENU], eCharger)
+
+        ArrayGetArray(g_aCharger, iBest, eCharger)
+        eCharger[CHARGER_FLAGS] |= FLAG_SELECT
+        ArraySetArray(g_aCharger, iBest, eCharger)
+        g_ePlayerData[id][PDATA_CHARGER_MENU] = iBest
+    }
+}
+
 public chargerUse(id)
 {
     if ( !(pev(id, pev_button) & IN_USE) )
@@ -1955,7 +2016,7 @@ public chargerSupply(id, eCharger[CHARGER], iItem, Float:fCurrentTime)
 
                     chargerGib(eCharger[CHARGER_ID])
                     if ( eCharger[CHARGER_SHOW] == SHOW_DEFAULT
-                    && eCharger[CHARGER_SPAWN_MODE] == SPAWN_DELAY )
+                    && eCharger[CHARGER_CHARGER_MODE] == CHARGER_DELAY )
                         eCharger[CHARGER_NEXT_SPAWN] = fCurrentTime + random_float(eCharger[CHARGER_SPAWN][0], eCharger[CHARGER_SPAWN][1])
 
                     if ( eCharger[CHARGER_FLAGS] & FLAG_EXPLODE )

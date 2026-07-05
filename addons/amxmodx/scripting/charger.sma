@@ -125,9 +125,8 @@ enum
     FLAG_SHOW               = (1 << 6),
     FLAG_DEAD               = (1 << 7),
     FLAG_GHOST              = (1 << 8),
-    FLAG_VALID              = (1 << 9),
-    FLAG_SELECT             = (1 << 10),
-    FLAG_ACTIVE             = (1 << 11)
+    FLAG_SELECT             = (1 << 9),
+    FLAG_ACTIVE             = (1 << 10)
 }
 
 enum
@@ -1274,44 +1273,45 @@ public menuHandlerRotate(id, menu, item)
     {
         case ROTATE_RIGHT:
         {
-            g_ePlayerData[id][PDATA_ROLL_OFFSET] -= 22.5
-            if ( g_ePlayerData[id][PDATA_ROLL_OFFSET] < 180.0 ) g_ePlayerData[id][PDATA_ROLL_OFFSET] += 360.0
+            pev(eCharger[CHARGER_ID], pev_angles, eCharger[CHARGER_ANGLES])
+            eCharger[CHARGER_ANGLES][2] += 22.5
+            if ( eCharger[CHARGER_ANGLES][2] > 180.0 ) eCharger[CHARGER_ANGLES][2] -= 360.0
+
+            set_pev(eCharger[CHARGER_ID], pev_angles, eCharger[CHARGER_ANGLES])
+            ArraySetArray(g_aCharger, iItem, eCharger)
 
             chargerSound(id, SOUND_MENU_NAV)
             chargerMenu(id, MENU_ROTATE)
         }
         case ROTATE_LEFT:
         {
-            g_ePlayerData[id][PDATA_ROLL_OFFSET] += 22.5
-            if ( g_ePlayerData[id][PDATA_ROLL_OFFSET] > 180.0 ) g_ePlayerData[id][PDATA_ROLL_OFFSET] -= 360.0
+            pev(eCharger[CHARGER_ID], pev_angles, eCharger[CHARGER_ANGLES])
+            eCharger[CHARGER_ANGLES][2] -= 22.5
+            if ( eCharger[CHARGER_ANGLES][2] < -180.0 ) eCharger[CHARGER_ANGLES][2] += 360.0
+
+            set_pev(eCharger[CHARGER_ID], pev_angles, eCharger[CHARGER_ANGLES])
+            ArraySetArray(g_aCharger, iItem, eCharger)
 
             chargerSound(id, SOUND_MENU_NAV)
             chargerMenu(id, MENU_ROTATE)
         }
         case ROTATE_PLACE:
         {
-            if ( chargerTrace(eCharger, id, iItem) )
-            {
-                g_ePlayerData[id][PDATA_CHARGER_GHOST] = 0
-                g_ePlayerData[id][PDATA_CHARGER_ACTION] = false
+            chargerTrace(eCharger, id)
+            g_ePlayerData[id][PDATA_CHARGER_GHOST] = 0
+            g_ePlayerData[id][PDATA_CHARGER_ACTION] = false
 
-                eCharger[CHARGER_NEXT_USE] = fCurrentTime + 0.25
-                eCharger[CHARGER_FLAGS] |= (FLAG_SHOW | FLAG_ACTIVE)
-                eCharger[CHARGER_FLAGS] &= ~FLAG_GHOST
+            eCharger[CHARGER_NEXT_USE] = fCurrentTime + 0.25
+            eCharger[CHARGER_FLAGS] |= (FLAG_SHOW | FLAG_ACTIVE)
+            eCharger[CHARGER_FLAGS] &= ~FLAG_GHOST
 
-                chargerSetAnim(eCharger)
-                chargerSetSolid(eCharger)
-                ArraySetArray(g_aCharger, iItem, eCharger)
+            chargerSetAnim(eCharger)
+            chargerSetSolid(eCharger)
+            ArraySetArray(g_aCharger, iItem, eCharger)
 
-                client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_CREATE_NEW", eCharger[CHARGER_NAME])
-                chargerSound(id, SOUND_MENU_NAV)
-                chargerMenu(id, MENU_ROOT)
-            }
-            else
-            {
-                chargerSound(id, SOUND_MENU_NAV)
-                chargerMenu(id, MENU_ROTATE)
-            }
+            client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_CREATE_NEW", eCharger[CHARGER_NAME])
+            chargerSound(id, SOUND_MENU_NAV)
+            chargerMenu(id, MENU_ROOT)
         }
         default:
         {
@@ -1328,7 +1328,7 @@ public menuHandlerRotate(id, menu, item)
 
 public chargerTask()
 {
-    new eCharger[CHARGER], iItem, bool:bModified, Float:fCurrentTime
+    new eCharger[CHARGER], bool:bModified, Float:fCurrentTime
     fCurrentTime = get_gametime()
 
     for ( new id = 1; id <= g_iMaxPlayers; id ++ )
@@ -1341,9 +1341,9 @@ public chargerTask()
             if ( g_ePlayerData[id][PDATA_CHARGER_ACTION] )
                 chargerCheck(id)
         }
-        else if ( (iItem = chargerGet(eCharger, g_ePlayerData[id][PDATA_CHARGER_GHOST])) != -1 )
+        else if ( chargerGet(eCharger, g_ePlayerData[id][PDATA_CHARGER_GHOST]) != -1 )
         {
-            chargerTrace(eCharger, id, iItem)
+            chargerTrace(eCharger, id)
         }
     }
 
@@ -1519,7 +1519,7 @@ public saveData(id)
         formatex(szData, charsmax(szData), "status = %d^n", eCharger[CHARGER_STATUS])
         fputs(iFile, szData)
 
-        eCharger[CHARGER_FLAGS] &= ~(FLAG_GHOST | FLAG_SELECT | FLAG_VALID)
+        eCharger[CHARGER_FLAGS] &= ~(FLAG_GHOST | FLAG_SELECT)
         formatex(szData, charsmax(szData), "flags = %d^n", eCharger[CHARGER_FLAGS])
         fputs(iFile, szData)
     }
@@ -1692,7 +1692,7 @@ public fwdAddToFullPack(es, e, iEnt, iHost, iHostFlags, iPlayer, pSet)
     }
     else if ( bHidden )
     {
-        if ( eCharger[CHARGER_FLAGS] & FLAG_GHOST && eCharger[CHARGER_FLAGS] & FLAG_VALID )
+        if ( eCharger[CHARGER_FLAGS] & FLAG_GHOST )
             return FMRES_IGNORED
 
         set_es(es, ES_RenderMode, kRenderTransAlpha)
@@ -1856,7 +1856,7 @@ public fwdKilled(id, iAttacker, bGib)
     return HAM_IGNORED
 }
 
-public bool:chargerTrace(eCharger[CHARGER], id, iItem)
+public chargerTrace(eCharger[CHARGER], id)
 {
     new Float:fVec1[3], Float:fVec2[3],
         Float:fFraction
@@ -1876,28 +1876,17 @@ public bool:chargerTrace(eCharger[CHARGER], id, iItem)
     get_tr2(0, TR_vecEndPos, eCharger[CHARGER_ORIGIN])
     get_tr2(0, TR_flFraction, fFraction)
 
-    if ( fFraction < 1.0 )
-    {
-        get_tr2(0, TR_vecPlaneNormal, fVec1)
-        eCharger[CHARGER_FLAGS] |= FLAG_VALID
-    }
-    else
-    {
-        xs_vec_mul_scalar(fVec1, -1.0, fVec1)
-        g_ePlayerData[id][PDATA_ROLL_OFFSET] = 0.0
-        eCharger[CHARGER_FLAGS] &= ~FLAG_VALID
-    }
+    if ( fFraction < 1.0 )  get_tr2(0, TR_vecPlaneNormal, fVec1)
+    else                    xs_vec_mul_scalar(fVec1, -1.0, fVec1)
 
-    engfunc(EngFunc_VecToAngles, fVec1, eCharger[CHARGER_ANGLES])
-    eCharger[CHARGER_ANGLES][2] = g_ePlayerData[id][PDATA_ROLL_OFFSET]
+    engfunc(EngFunc_VecToAngles, fVec1, fVec1)
+    pev(eCharger[CHARGER_ID], pev_angles, fVec2)
+    fVec1[2] = fVec2[2]
 
     chargerSetBox(eCharger)
     chargerSetOffset(eCharger)
     set_pev(eCharger[CHARGER_ID], pev_origin, eCharger[CHARGER_ORIGIN])
-    set_pev(eCharger[CHARGER_ID], pev_angles, eCharger[CHARGER_ANGLES])
-    ArraySetArray(g_aCharger, iItem, eCharger)
-
-    return fFraction < 1.0
+    set_pev(eCharger[CHARGER_ID], pev_angles, fVec1)
 }
 
 stock chargerCheck(id)

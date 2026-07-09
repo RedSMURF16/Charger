@@ -68,16 +68,19 @@
     #define MAX_PLATFORM_PATH_LENGTH 256
 #endif
 
-#define MAX_ENT             32
-#define BREAK_FLAG_METAL    2
-#define CHARGER_KEY         1248
-#define CHARGER_ARRAY_ITEM  pev_iuser1
+#define MAX_ENT                 32
+#define BREAK_FLAG_METAL        2
+#define CHARGER_KEY             1248
+#define CHARGER_ARRAY_ITEM      pev_iuser1
 
 /**
  *  Charger animation sequences.
  */
-#define CHARGER_SEQ_IDLE    0
-#define CHARGER_SEQ_OFF     1
+#define CHARGER_SEQ_IDLE        0
+#define CHARGER_SEQ_OFF         1
+
+#define XO_CBASEPLAYER          5
+#define XO_CBASEPLAYERWEAPON    4
 
 new const PLUGIN_VERSION[]          = "2.2"
 new const Float:DELAY_ON_CONNECT    = 1.0
@@ -1146,6 +1149,14 @@ public menuHandlerStatus(id, menu, item)
             chargerSound(id, SOUND_MENU_ALERT)
             chargerMenu(id, MENU_STATUS)
         }
+        case MENU_EXIT:
+        {
+            chargerSound(id, SOUND_MENU_NAV)
+            chargerMenu(id, MENU_ROOT)
+
+            g_ePlayerData[id][PDATA_CHARGER_ACTION] = false
+            g_ePlayerData[id][PDATA_CHARGER_MENU] = 0
+        }
         default:
         {
             g_ePlayerData[id][PDATA_CHARGER_ACTION] = false
@@ -1232,6 +1243,14 @@ public menuHandlerRemove(id, menu, item)
             chargerSound(id, SOUND_MENU_ALERT)
             chargerMenu(id, MENU_ROOT)
         }
+        case MENU_EXIT:
+        {
+            chargerSound(id, SOUND_MENU_NAV)
+            chargerMenu(id, MENU_ROOT)
+
+            g_ePlayerData[id][PDATA_CHARGER_MENU] = 0
+            g_ePlayerData[id][PDATA_CHARGER_ACTION] = false
+        }
         default:
         {
             g_ePlayerData[id][PDATA_CHARGER_MENU] = 0
@@ -1310,6 +1329,16 @@ public menuHandlerRotate(id, menu, item)
             ArraySetArray(g_aCharger, iItem, eCharger)
 
             client_print_color(id, id, "%L %L", id, "CHARGER_CHAT_TAG", id, "CHARGER_CHAT_CREATE_NEW", eCharger[CHARGER_NAME])
+            chargerSound(id, SOUND_MENU_NAV)
+            chargerMenu(id, MENU_ROOT)
+        }
+        case MENU_EXIT:
+        {
+            chargerKill(eCharger[CHARGER_ID])
+            chargerRemove(iItem)
+            g_ePlayerData[id][PDATA_CHARGER_GHOST] = 0
+            g_ePlayerData[id][PDATA_CHARGER_ACTION] = false
+
             chargerSound(id, SOUND_MENU_NAV)
             chargerMenu(id, MENU_ROOT)
         }

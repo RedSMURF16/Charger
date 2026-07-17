@@ -967,9 +967,16 @@ public menuCreate(id, iMenu)
 
 public menuHandlerCreate(id, menu, item)
 {
-    if ( item == MENU_EXIT
-    || !is_user_alive(id) )
+    if ( !is_user_alive(id) )
     {
+        menu_destroy(menu)
+        return PLUGIN_HANDLED
+    }
+    else if ( item == MENU_EXIT )
+    {
+        chargerSound(id, SOUND_MENU_NAV)
+        chargerMenu(id, MENU_ROOT)
+
         menu_destroy(menu)
         return PLUGIN_HANDLED
     }

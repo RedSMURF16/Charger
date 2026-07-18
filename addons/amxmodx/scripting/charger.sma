@@ -1288,7 +1288,6 @@ public menuHandlerRotate(id, menu, item)
             g_ePlayerData[id][PDATA_CHARGER_GHOST] = 0
             g_ePlayerData[id][PDATA_CHARGER_ACTION] = false
 
-            eCharger[CHARGER_ANGLES][0] = -eCharger[CHARGER_ANGLES][0]
             eCharger[CHARGER_NEXT_USE] = fCurrentTime + 0.25
             eCharger[CHARGER_FLAGS] |= (FLAG_SHOW | FLAG_ACTIVE)
             eCharger[CHARGER_FLAGS] &= ~FLAG_GHOST
@@ -1597,6 +1596,7 @@ stock loadDataCharger(Float:fOrigin[3], Float:fAngles[3], iFlags, iItem, iCount)
     chargerCreate(0, iItem)
     ArrayGetArray(g_aCharger, iCount, eCharger)
 
+    fAngles[0] = -fAngles[0]
     xs_vec_copy(fOrigin, eCharger[CHARGER_ORIGIN])
     xs_vec_copy(fAngles, eCharger[CHARGER_ANGLES])
     set_pev(eCharger[CHARGER_ID], pev_origin, fOrigin)

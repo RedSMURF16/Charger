@@ -793,11 +793,11 @@ public client_authorized(id)
 
 public client_disconnected(id)
 {
-    new iItem
+    new eCharger[CHARGER], iItem
     if ( g_ePlayerData[id][PDATA_CHARGER_GHOST]
-    && (iItem = pev(g_ePlayerData[id][PDATA_CHARGER_GHOST], CHARGER_ARRAY_ITEM)) != -1 )
+    && (iItem = chargerGet(eCharger, g_ePlayerData[id][PDATA_CHARGER_GHOST])) != -1 )
     {
-        chargerKill(g_ePlayerData[id][PDATA_CHARGER_GHOST])
+        chargerKill(eCharger[CHARGER_ID])
         chargerRemove(iItem)
     }
 

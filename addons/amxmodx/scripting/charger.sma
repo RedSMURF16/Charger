@@ -388,8 +388,8 @@ public plugin_init()
 {
     register_plugin("Charger", PLUGIN_VERSION, "RedSMURF")
 
-    register_clcmd("say /charger",      "cmdMenu", ADMIN_RCON)
-    register_clcmd("say_team /charger", "cmdMenu", ADMIN_RCON)
+    register_clcmd("say /charger",      "cmdMenu", ADMIN_RCON, "-- Opens the Charger menu.")
+    register_clcmd("say_team /charger", "cmdMenu", ADMIN_RCON, "-- Opens the Charger menu.")
     register_concmd("charger_reload",   "cmdReload", ADMIN_RCON, "-- Reload the configuration file")
 
     register_dictionary("Charger.txt")
@@ -454,23 +454,6 @@ public cmdReload(id, iLevel, iCmd)
     console_print(id, "The configuration file has been reloaded successfully !")
 
     return PLUGIN_HANDLED
-}
-
-public client_command(id)
-{
-    if ( !g_ePlayerData[id][PDATA_CHARGER_GHOST] )
-        return PLUGIN_CONTINUE
-
-    new szCmd[16]
-    read_argv(0, szCmd, charsmax(szCmd))
-
-    if ( contain(szCmd, "weapon_") != -1 ||
-    equal(szCmd, "invnext") ||
-    equal(szCmd, "invprev") ||
-    equal(szCmd, "lastinv") )
-        return PLUGIN_HANDLED
-
-    return PLUGIN_CONTINUE
 }
 
 public eventRoundStart()

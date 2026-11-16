@@ -17,6 +17,10 @@ Custom setups are saved per map and automatically loaded on every map start.
 - Distinct Health and HEV sound sets, including charge, depletion, and flicker/metal-break sounds
 - Noclip and intuitive ghost preview tracking for natural alignment with grounds and walls
 
+## 📋 Requirements
+- ReGameDLL
+- AMX Mod X 1.10+
+
 ## 💬 Commands
 - `say /charger` - Opens the charger menu.
 - `say_team /charger` - Opens the charger menu.

@@ -16,7 +16,6 @@ Custom setups are saved per map and automatically loaded on every map start.
 - Delayed and timed activation with random ranges for round-based gameplay
 - Distinct Health and HEV sound sets, including charge, depletion, and flicker/metal-break sounds
 - Noclip and intuitive ghost preview tracking for natural alignment with grounds and walls
-- [color=red]Requires AMX Mod X 1.9.0+[/color]
 
 ## 💬 Commands
 - `say /charger` - Opens the charger menu.
@@ -70,3 +69,5 @@ Custom setups are saved per map and automatically loaded on every map start.
 * v2.1: Bug fixes and config improvements.
 * v2.2: Added FLAG_ACTIVE_DURATION, improved round-start logic.
 ```
+
+[![Watch on YouTube](https://img.shields.io/badge/YouTube-Watch%20video-FF0000?logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=hXi4Xns7GmI)

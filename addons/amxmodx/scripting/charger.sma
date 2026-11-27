@@ -491,8 +491,17 @@ stock ReadFile()
 {
     if ( g_bFileWasRead )
     {
-        for ( new id = 1; id <= g_iMaxPlayers; id ++ )
-            if ( is_user_connected(id))
+        ArrayClear(g_aChargerConfig)
+        g_iChargerConfig = 0
+    }
+
+    new szFile[MAX_RESOURCE_PATH_LENGTH], iFile
+    get_configsdir(szFile, charsmax(szFile))
+    add(szFile, charsmax(szFile), "/Charger.ini")
+    iFile = fopen(szFile, "rt")
+
+    if ( !iFile )
+    {
         set_fail_state("An error occured during the opening of the configuration file !")
     }
 

@@ -1,7 +1,7 @@
 <h1 align="center">Charger</h1>
 
 <p align="center">
-  <a href="https://www.youtube.com/watch?v=hXi4Xns7GmI"><img src="https://img.youtube.com/vi/hXi4Xns7GmI/maxresdefault.jpg" alt="Watch on YouTube" width="600"></a>
+  <img src="images/demo.gif" alt="Charger">
 </p>
 
 ## 📝 Description
@@ -16,10 +16,6 @@ Custom setups are saved per map and automatically loaded on every map start.
 - Delayed and timed activation with random ranges for round-based gameplay
 - Distinct Health and HEV sound sets, including charge, depletion, and flicker/metal-break sounds
 - Noclip and intuitive ghost preview tracking for natural alignment with grounds and walls
-
-## 📋 Requirements
-- ReGameDLL
-- AMX Mod X 1.10+
 
 ## 💬 Commands
 - `say /charger` - Opens the charger menu.
